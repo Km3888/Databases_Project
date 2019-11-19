@@ -1,12 +1,12 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-#from config import config
-from flask.ext.login import LoginManager
+from config import config
+from flask_login import LoginManager
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth.login'  #route for login page prefixed with auth blueprint name
+login_manager.login_view = 'auth.auth'  #route for auth page prefixed with auth blueprint name
 
 bootstrap = Bootstrap()
 db = SQLAlchemy()
@@ -23,8 +23,9 @@ def create_app(config_name):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-
+    # from .auth import auth as auth_blueprint
+    # app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    #
+    # from .booking import booking as booking_blueprint
+    # app.register_blueprint(booking_blueprint,url_prefix='/booking')
     return app
-
