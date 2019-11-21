@@ -28,8 +28,7 @@ class StaffLoginForm(FlaskForm):
     submit = SubmitField('Log In')
 
 class CustomerRegistrationForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(message='Mandatory'), Length(1, 64),
-                                             Email()])
+    email = StringField('Email', validators=[DataRequired(message='Mandatory'), Length(1, 64)])
     username = StringField('Username', validators=[
         DataRequired(message='Mandatory'), Length(1, 64),
         Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
@@ -58,10 +57,32 @@ class CustomerRegistrationForm(FlaskForm):
             raise ValidationError('Username already in use.')
 
 class BookingAgentRegistrationForm(FlaskForm):
-    pass
+    email = StringField('Username', validators=[
+        DataRequired(message='Mandatory'), Length(1, 64)])
+    password = PasswordField('Password', validators=[
+        DataRequired(), EqualTo('password2', message='Passwords must match.')])
+    password2 = PasswordField('Confirm password', validators=[DataRequired(message='Mandatory')])
+    id=StringField('Agent id')
+    submit=SubmitField('Register')
+
 
 class StaffRegistrationForm(FlaskForm):
-    pass
+    username = StringField('Username', validators=[
+        DataRequired(message='Mandatory'), Length(1, 64),
+        Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+               'Usernames must have only letters, numbers, dots or '
+               'underscores')])
+    password = PasswordField('Password', validators=[
+        DataRequired(), EqualTo('password2', message='Passwords must match.')])
+    password2 = PasswordField('Confirm password', validators=[DataRequired(message='Mandatory')])
+    first_name=StringField('First Name',validators=[DataRequired(message='Mandatory'),Length(1,64)])
+    last_name= StringField('Last Name', validators=[DataRequired(message='Mandatory'), Length(1, 64)])
+    dob = DateField('Date of Birth', validators=[DataRequired(message="You must enter date of birth")],
+                    format='%d/%m/%Y')
+    airline_name=StringField('Airline Name',validators=[DataRequired(message='Mandatory'),Length(1,64)])
+
+    submit = SubmitField('Register')
+
 
 class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),

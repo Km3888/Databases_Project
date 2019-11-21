@@ -15,7 +15,8 @@ class Permission:
 
 class BookingAgent(UserMixin,db.Model):
     __tablename__='agent'
-    email= db.Column(db.String(64),primary_key=True)
+
+    email=db.Column(db.String(64),primary_key=True)
     password_hash = db.Column(db.String(128))
     booking_agent_id= db.Column(db.Integer)
 
@@ -40,6 +41,7 @@ class BookingAgent(UserMixin,db.Model):
 
 class Customer(db.Model):
     __tablename__='customer'
+
     email=db.Column(db.String(64),primary_key=True)
     name=db.Column(db.String(64))
     password_hash=db.Column(db.String(128))

@@ -3,10 +3,12 @@ from flask_login import login_user, logout_user, login_required, \
     current_user
 from . import auth
 from .. import db
-from ..models import Customer,BookingAgent,Airline_Staff
+from ..models import Customer,BookingAgent,Airline_Staff,Airline
 from .forms import StaffLoginForm,CustomerLoginForm, RegistrationForm, ChangePasswordForm,\
     PasswordResetRequestForm, PasswordResetForm,UserTypeForm,\
-    BookingAgentLoginForm,CustomerRegistrationForm
+    BookingAgentLoginForm,CustomerRegistrationForm,BookingAgentRegistrationForm,\
+    StaffRegistrationForm
+
 
 
 @auth.before_app_request
@@ -109,7 +111,7 @@ def register_cust():
     form=CustomerRegistrationForm()
     if form.validate_on_submit():
         result=Customer.query.filter_by(email=form.email.data).first()
-        if result is not None:
+        if result is None:
             custy=Customer(email=form.email.data,
                            name=form.name.data,
                            password_hash=form.password_hash.data,
@@ -127,6 +129,47 @@ def register_cust():
             flash('your account has been created')
             return redirect(url_for('auth.login'))
         flash('That email already has an account')
+    return render_template('auth/register.html',form=form)
+
+@auth.route('/register/agent',methods=['GET','POST'])
+def register_agent():
+    form=BookingAgentRegistrationForm()
+    if form.validate_on_submit():
+        result=BookingAgent.query.filter_by(username=form.username.data).first()
+        if result is None:
+            #TODO figure out why this is being weird
+            new_agent=BookingAgent(email=form.email.data.lower(),
+                                   booking_agent_id=form.id.data,
+                                   password=form.password.data,)
+            db.session.add(new_agent)
+            db.session.commit()
+            flash('you have successfully registered')
+            return redirect(url_for('main.index'))
+        flash('That username is taken')
+    return render_template('auth/register.html',form=form)
+
+
+@auth.route('/register/staff',methods=['GET','POST'])
+def register_staff():
+    form=StaffRegistrationForm()
+    if form.validate_on_submit():
+        result=Airline_Staff.query.filter_by(username=form.username.data).first()
+        if result is None:
+            airline_result = Airline.query.filter_by(name=form.airline_name.data).first()
+            if airline_result is not None:
+                #TODO more weirdness
+                new_staff=Airline_Staff(username=form.username.data,
+                                        password=form.password.data,
+                                        first_name=form.first_name.data,
+                                        last_name=form.last_name.data,
+                                        date_of_birth=form.dob.data,
+                                        airline_name=form.airline_name.data)
+                db.session.add(new_staff)
+                db.session.commit()
+                flash('you have successfully registered')
+                return redirect(url_for('main.index'))
+            flash('You must enter a valid airline')
+        flash('That username is taken')
     return render_template('auth/register.html',form=form)
 
 # @auth.route('/register', methods=['GET', 'POST'])
