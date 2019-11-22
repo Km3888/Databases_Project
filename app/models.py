@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin,AnonymousUserMixin
 
+
 #TODO flesh out permissions
 class Permission:
     FOLLOW = 1
@@ -17,6 +18,7 @@ class BookingAgent(UserMixin,db.Model):
     __tablename__='agent'
 
     email=db.Column(db.String(64),primary_key=True)
+    #no longer email
     password_hash = db.Column(db.String(128))
     booking_agent_id= db.Column(db.Integer)
 
@@ -30,16 +32,19 @@ class BookingAgent(UserMixin,db.Model):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
 
+    def get_id(self):
+        return self.email
+
     def verify_password(self,password):
         return check_password_hash(self.password_hash,password)
 
     def verify_id(self,id):
-        return id==self.booking_agent_id
+        return int(id)==self.booking_agent_id
 
     def __repr__(self):
         return '<User %r>'%self.email
 
-class Customer(db.Model):
+class Customer(UserMixin,db.Model):
     __tablename__='customer'
 
     email=db.Column(db.String(64),primary_key=True)
@@ -70,6 +75,9 @@ class Customer(db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return self.email
+
     def __repr__(self):
         return '<User %r>' % self.email
 
@@ -93,6 +101,9 @@ class Airline_Staff(UserMixin,db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return self.email
+
     def __repr__(self):
         return '<User %r>' % self.email
 
@@ -107,6 +118,7 @@ class Airplane(db.Model):
     __tablename__='airplane'
     airline_name=db.Column(db.String(64),db.ForeignKey('airline.name'),primary_key=True)
     id=db.Column(db.String(64))
+
 
 
 class Flight(db.Model):
@@ -132,9 +144,8 @@ class Airport(db.Model):
     name=db.Column(db.String(64),primary_key=True)
     city=db.Column(db.String(64))
 
-    flight_arrival=db.relationship('Flight',backref='airport',foreign_keys=[Flight.arrives])
-    flight_departure=db.relationship('Flight',backref='other_airport',foreign_keys=[Flight.departs])
-
+    flight_arrival=db.relationship('Flight',backref='airport',foreign_keys=[Flight.arrives],lazy='dynamic')
+    flight_departure=db.relationship('Flight',backref='other_airport',foreign_keys=[Flight.departs],lazy='dynamic')
 
 class Ticket(db.Model):
     __tablename__='ticket'
@@ -161,5 +172,13 @@ class Purchase(db.Model):
     comment=db.Column(db.String(300))
     date=db.Column(db.DateTime)
 
+@login_manager.user_loader
 def load_user(user_id):
-    return BookingAgent.query.get(int(user_id))
+    t=user_id.split('_')[0]
+    if t=='agent':
+        return BookingAgent.query.filter_by(email=user_id).first()
+    if t=='customer':
+        return Customer.query.filter_by(email=user_id).first()
+    if t=='staff':
+        return Airline_Staff.query.filter_by(username=user_id).first()
+    raise Exception('SOMETHING HAPPENED')
