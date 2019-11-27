@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky - view_searchfutureflights{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Your future flights:</h1>
+</div>
+
+<table>
+
+  <th>ticket_id</th>
+
+{% for line in data %}
+  <tr>
+
+    <td>{{line.ticket_id}}</td>
+
+  </tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}

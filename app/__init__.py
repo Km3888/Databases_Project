@@ -31,6 +31,17 @@ def create_app(config_name):
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
+    from .public import public as public_blueprint
+    app.register_blueprint(public_blueprint,url_prefix='/public')
+
+    from .customer import customer as customer_blueprint
+    app.register_blueprint(customer_blueprint,url_prefix='/customer')
+
+    from .agent import agent as agent_blueprint
+    app.register_blueprint(agent_blueprint, url_prefix='/agent')
+
+    from .staff import staff as staff_blueprint
+    app.register_blueprint(staff_blueprint,url_prefix='/staff')
     # from .booking import booking as booking_blueprint
     # app.register_blueprint(booking_blueprint,url_prefix='/booking')
     return app

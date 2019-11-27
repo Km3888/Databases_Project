@@ -3,7 +3,13 @@
 {% block title %}GloboTravel{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
+<div> <class="page-header">
+    <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.username or current_user.email.split('_')[1]}}{% else %}Stranger{% endif %}!</h1>
+</div>
+<div> <class="container">
+  <a href="{{ url_for('public.searchfutureflights') }}">Search Future Flights</a>
+</div>
+<div> <class="container">
+  <a href="{{ url_for('public.seeflightsstatus') }}">See Flights Status</a>
 </div>
 {% endblock %}

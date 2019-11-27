@@ -57,7 +57,7 @@ class CustomerRegistrationForm(FlaskForm):
             raise ValidationError('Username already in use.')
 
 class BookingAgentRegistrationForm(FlaskForm):
-    email = StringField('Username', validators=[
+    email = StringField('Email', validators=[
         DataRequired(message='Mandatory'), Length(1, 64)])
     password = PasswordField('Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords must match.')])

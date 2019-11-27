@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}GloboTravel{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.get_identifier()}}{% else %}Stranger{% endif %}!</h1>
+</div>
+<h1>Flight Info</h1>
+<div class="container">
+  <a href="{{ url_for('public.searchfutureflights') }}">Search Future Flights</a>
+</div>
+<div class="container">
+  <a href="{{ url_for('public.seeflightsstatus') }}">See Flight Status</a>
+</div>
+<div class="container">
+    <a href="{{ url_for ('customer.myflights')}}">Your Flights</a>
+</div>
+<div class="container">
+    <a href="{{ url_for ('customer.purchase_flight')}}">Book a flight </a>
+</div>
+<div class="container">
+    <a href="{{ url_for ('customer.ratings')}}">Review Your Previous Flights</a>
+</div>
+<div class="container">
+    <a href="{{ url_for ('customer.spending')}}">Track your spending</a>
+</div>
+
+{% endblock %}

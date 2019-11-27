@@ -1,0 +1,39 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky - view_searchfutureflights{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Results for Search Future Flights</h1>
+</div>
+
+<table>
+  <th>ticket_id</th>
+  <!--<th>flight_num</th>-->
+  <!--<th>departure_time</th>-->
+  <!--<th>departs</th>-->
+  <!--<th>arrival_time</th>-->
+  <!--<th>arrives</th>-->
+  <!--<th>airline_name</th>-->
+  <!--<th>Dep</th>-->
+  <!--<th>Arr</th>-->
+
+{% for line in data %}
+  <tr>
+    <td>{{line.ticket.ticket_id}}</td>
+    <!--<td>{{line.flight_num}}</td>-->
+    <!--<td>{{line.departure_time}}</td>-->
+    <!--<td>{{line.arrival_time}}</td>-->
+    <!--<td>{{line.price}}</td>-->
+    <!--<td>{{line.departs}}</td>-->
+    <!--<td>{{line.status}}</td-->
+    <!--<td>{{line.arrives}}</td>-->
+    <!--<td>{{line.departs}}</td>-->
+
+  </tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}
