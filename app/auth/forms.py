@@ -21,6 +21,7 @@ class BookingAgentLoginForm(FlaskForm):
     remember_me = BooleanField('Keep me logged in')
     submit = SubmitField('Log In')
 
+
 class StaffLoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
     password = PasswordField('Password', validators=[DataRequired()])

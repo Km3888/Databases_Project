@@ -1,0 +1,24 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Confirm your purchase{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Confirm Your Purchase</h1>
+</div>
+
+<h1>Flight info:</h1>
+Airline_name: {{airline_name}} <br>
+Flight Number: {{flight_num}} <br>
+Departure Time: {{departure_time}} <br>
+Source Airport: {{source}} <br>
+Arrival Time: {{arrival_time}} <br>
+Destination Airport: {{destination}} <br>
+Price: {{price}} <br>
+
+<h1>Payment Info</h1>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

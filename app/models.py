@@ -3,6 +3,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin,AnonymousUserMixin
+from sqlalchemy import Sequence
 
 
 #TODO flesh out permissions
@@ -174,7 +175,7 @@ class Airport(db.Model):
 
 class Ticket(db.Model):
     __tablename__='ticket'
-    ticket_id=db.Column(db.String(64),primary_key=True)
+    ticket_id=db.Column(db.Integer,Sequence('ticket id'),primary_key=True)
     airline_name=db.Column(db.String(64))
     flight_num=db.Column(db.Integer)
     departure_time=db.Column(db.DateTime)
@@ -190,16 +191,15 @@ class Ticket(db.Model):
 
 class Purchase(db.Model):
     __tablename__='purchase'
-    ticket_id=db.Column(db.String(64),db.ForeignKey('ticket.ticket_id'),primary_key=True)
-    email_booking=db.Column(db.String(64),db.ForeignKey('agent.email'),primary_key=True)
-    email_customer=db.Column(db.String(64),db.ForeignKey('customer.email'),primary_key=True)
+    ticket_id=db.Column(db.Integer,db.ForeignKey('ticket.ticket_id'),primary_key=True)
+    email_booking=db.Column(db.String(64),db.ForeignKey('agent.email'))
+    email_customer=db.Column(db.String(64),db.ForeignKey('customer.email'))
     rating=db.Column(db.Integer())
     comment=db.Column(db.String(300))
     date=db.Column(db.DateTime)
+    card_num=db.Column(db.Integer)
+    card_expiration=db.Column(db.DateTime)
 
-    __table_args__=(
-        db.PrimaryKeyConstraint('ticket_id','email_booking','email_customer'),
-    )
 
 @login_manager.user_loader
 def load_user(user_id):

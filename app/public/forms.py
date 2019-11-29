@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField,SelectField,DateField
+from wtforms.fields.html5 import DateTimeLocalField,DateField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
 from ..models import Flight
@@ -18,7 +19,7 @@ class OneWayForm(FlaskForm):
     dest_city=StringField('Destination City',validators=[DataRequired(message='Mandatory')])
     source_airport = StringField('Source Airport')
     dest_airport = StringField('Destination Airport')
-    flight_date = DateField('Flight Date',validators=[DataRequired(message='Mandatory')],format='%d/%m/%Y')
+    flight_date = DateField('Flight Date',[DataRequired(message='dd/mm/yyyy')])
     submit = SubmitField('Search')
 
 class FlightTypeForm(FlaskForm):

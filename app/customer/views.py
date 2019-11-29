@@ -1,22 +1,25 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash,session
 from flask_login import login_user, logout_user, login_required, \
     current_user
 from . import customer
 from .. import db
-from .forms import PurchaseFlightForm
-from ..models import Customer,BookingAgent,Airline_Staff,Airline,load_user,Flight, Ticket,Purchase
-# from .forms import StaffLoginForm,CustomerLoginForm, RegistrationForm, ChangePasswordForm,\
-#     PasswordResetRequestForm, PasswordResetForm,UserTypeForm,\
-#     BookingAgentLoginForm,CustomerRegistrationForm,BookingAgentRegistrationForm,\
-#     StaffRegistrationForm
+from .forms import PurchaseFlightForm,ConfirmPurchaseForm
+from ..models import Customer,BookingAgent,Airline_Staff,Airline,load_user,Flight, Ticket,Purchase,Airplane
 
-from datetime import datetime
+from datetime import datetime,date
 
 @customer.route('/myflights',methods=['GET','POST'])
 def myflights():
     if not current_user.is_authenticated or not current_user.get_type()=='customer':
         return redirect(url_for('main.index'))
-    data=Ticket.query.join(Purchase).filter_by(email_customer=current_user.get_id())
+    data=db.session.query(Ticket,Purchase,Flight).join(Purchase,\
+        Ticket.ticket_id==Purchase.ticket_id).join(Flight, Ticket.airline_name==Flight.airline_name & (Ticket.flight_num==Flight.flight_num) & (Ticket.departure_time==Flight.departure_time))\
+        .filter((Purchase.email_customer==current_user.get_identifier())).filter(Flight.departure_time >= datetime.now()).all()
+
+    print('data:',data)
+    for x in data:
+        print(x[2].departs)
+
     return render_template('customer/customer_flights.html',data=data)
 
 #TODO
@@ -28,16 +31,88 @@ def browse_flights():
 def purchase_flight():
     form=PurchaseFlightForm()
     if form.validate_on_submit():
-        flight=Flight.query.filter_by(airline_name=form.airline_name.data,departure_time=form.departure.data,).first()
-        if flight is None:
-            flash(u'we need a real flight dawg')
-        #calculate price
-        return url_for('confirm_purchase')
+        flight=db.session.query(Flight).filter_by(airline_name=form.airline_name.data,
+                                                flight_num=form.flight_num.data,
+                                                departure_time=form.departure.data,
+                                      ).first()
+        if flight is not None:
+            #calculate price
+            session['airline']=form.airline_name.data
+            session['flight_num']=form.flight_num.data
+            session['departure']=form.departure.data
+            return redirect('confirm_purchase')
+        flash(u'we need a real flight dawg')
     return render_template('customer/book_flights.html',form=form)
 
 @customer.route('confirm_purchase',methods=['GET','POST'])
 def confirm_purchase():
-    pass
+    if ('airline' not in session) or ('flight_num' not in session) or ('departure' not in session):
+        flash('no flight selected')
+        return redirect(url_for('main.index'))
+
+    airline_name=session.get('airline')
+    flight_num = session.get('flight_num')
+    departure_time = session.get('departure')
+
+    session.pop('airline')
+    session.pop('flight_num')
+    session.pop('departure')
+
+    #calculate price
+    flight=db.session.query(Flight).filter_by(airline_name=airline_name,
+                                              flight_num=flight_num,
+                                              departure_time=departure_time).first()
+
+    price=flight.price
+    ticket=db.session.query(Flight,Ticket).join(Ticket,Flight.airline_name==Ticket.airline_name & \
+                                                Flight.flight_num==Ticket.flight_num & \
+                                                Flight.departure_time==Ticket.departure_time).all()
+    num_tickets=len(ticket)
+    airplane=db.session.query(Airplane).filter_by(airline_name=flight.airline_name,id=flight.airplane_id).first()
+    capacity=airplane.seat_count
+    if num_tickets>=.7*capacity:
+        price*=1.2
+
+    form=ConfirmPurchaseForm()
+    if form.validate_on_submit():
+        #Create ticket and Purchase objects
+        ticket=Ticket(ticket_id=len(Ticket.query.all()),
+                      airline_name=airline_name,
+                      flight_num=flight_num,
+                      departure_time=departure_time,
+                      price=price)
+        purchase=Purchase(ticket_id=ticket.ticket_id,
+                          email_customer=current_user.get_id().split('_')[1:],
+                          card_num=form.card_number.data,
+                          card_expiration=form.card_expiration.data,
+                          date=datetime.now())
+        db.session.add(ticket)
+        db.session.add(purchase)
+        db.session.commit()
+        return redirect(url_for('main.index'))
+
+    arrival_time=flight.arrival_time
+    source=flight.departs
+    destination=flight.arrives
+
+    session['airline'] = airline_name
+    session['flight_num'] = flight_num
+    session['departure'] = departure_time
+
+    return render_template('customer/purchase_confirmation.html',form=form,
+                           airline_name=airline_name,
+                           flight_num=flight_num,
+                           departure_time=departure_time,
+                           arrival_time=arrival_time,
+                           source=source,
+                           destination=destination,
+                            price=price)
+
+
+
+
+    #2020-05-05 14:56:00
+
 
 #TODO
 @customer.route('/ratings',methods=['GET','POST'])

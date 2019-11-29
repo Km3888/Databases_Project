@@ -4,6 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
+    # redis://password@localhost:6379
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

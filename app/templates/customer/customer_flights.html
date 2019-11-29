@@ -1,21 +1,33 @@
 {% extends "index.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}Flasky - view_searchfutureflights{% endblock %}
+{% block title %}GloboTravel - view_searchfutureflights{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
     <h1>Your future flights:</h1>
 </div>
 
-<table>
+<table style="width:75%">
 
-  <th>ticket_id</th>
+  <th>From</th>
+
+  <th>To</th>
+
+  <th>Departure</th>
+
+  <th>Arrival</th>
 
 {% for line in data %}
   <tr>
 
-    <td>{{line.ticket_id}}</td>
+    <td>{{line[2].departs}}</td>
+
+      <td>{{line[2].arrives}}</td>
+
+      <td>{{line[2].departure_time}}</td>
+
+      <td>{{line[2].arrival_time}}</td>
 
   </tr>
 {% endfor %}

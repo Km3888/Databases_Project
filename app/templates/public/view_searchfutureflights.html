@@ -7,9 +7,15 @@
 <div class="page-header">
     <h1>Results for Search Future Flights</h1>
 </div>
-
-<table>
-  <th>ticket_id</th>
+<table style="width: 100%">
+  <th> airline</th>
+  <th> flight number</th>
+  <th> departure time </th>
+  <th> arrival time</th>
+  <th> departure airport</th>
+  <th> arrival airport</th>
+  <th> flight status</th>
+  <th> price</th>
   <!--<th>flight_num</th>-->
   <!--<th>departure_time</th>-->
   <!--<th>departs</th>-->
@@ -21,15 +27,14 @@
 
 {% for line in data %}
   <tr>
-    <td>{{line.ticket.ticket_id}}</td>
-    <!--<td>{{line.flight_num}}</td>-->
-    <!--<td>{{line.departure_time}}</td>-->
-    <!--<td>{{line.arrival_time}}</td>-->
-    <!--<td>{{line.price}}</td>-->
-    <!--<td>{{line.departs}}</td>-->
-    <!--<td>{{line.status}}</td-->
-    <!--<td>{{line.arrives}}</td>-->
-    <!--<td>{{line.departs}}</td>-->
+    <td>{{line[0].airline_name}}</td>
+    <td>{{line[0].flight_num}}</td>
+    <td>{{line[0].departure_time}}</td>
+    <td>{{line[0].arrival_time}}</td>
+      <td>{{line[0].departs}}</td>
+    <td>{{line[0].arrives}}</td>
+    <td>{{line[0].status}}</td
+    <td>{{line[0].price}}</td>
 
   </tr>
 {% endfor %}
