@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, \
     current_user
 from . import auth
@@ -155,7 +155,7 @@ def register_staff():
             airline_result = Airline.query.filter_by(name=form.airline_name.data).first()
             if airline_result is not None:
                 #TODO more weirdness
-                new_staff=Airline_Staff(username=+form.username.data,
+                new_staff=Airline_Staff(username=form.username.data,
                                         password=form.password.data,
                                         first_name=form.first_name.data,
                                         last_name=form.last_name.data,
