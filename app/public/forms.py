@@ -6,20 +6,20 @@ from wtforms import ValidationError
 from ..models import Flight
 
 class TwoWayForm(FlaskForm):
-    source_city=StringField('Source City',validators=[DataRequired(message='Mandatory')])
-    dest_city=StringField('Destination City',validators=[DataRequired(message='Mandatory')])
+    source_city=StringField('Source City')
+    dest_city=StringField('Destination City')
     source_airport = StringField('Source Airport')
     dest_airport = StringField('Destination Airport')
-    dest_date = DateField('Destination Date',validators=[DataRequired(message='Mandatory')],format='%d/%m/%Y')
-    return_date = DateField('Return Date',validators=[DataRequired(message='Mandatory')],format='%d/%m/%Y')
+    dest_date = DateField('Destination Date',validators=[DataRequired(message='Mandatory')])
+    return_date = DateField('Return Date',validators=[DataRequired(message='Mandatory')])
     submit = SubmitField('Search')
 
 class OneWayForm(FlaskForm):
-    source_city=StringField('Source City',validators=[DataRequired(message='Mandatory')])
-    dest_city=StringField('Destination City',validators=[DataRequired(message='Mandatory')])
+    source_city=StringField('Source City')
+    dest_city=StringField('Destination City')
     source_airport = StringField('Source Airport')
     dest_airport = StringField('Destination Airport')
-    flight_date = DateField('Flight Date',[DataRequired(message='dd/mm/yyyy')])
+    flight_date = DateField('Flight Date',validators=[DataRequired(message='dd/mm/yyyy')])
     submit = SubmitField('Search')
 
 class FlightTypeForm(FlaskForm):

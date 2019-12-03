@@ -1,10 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky - view_searchfutureflights{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Departing Flights</h1>
+</div>
+<table style="width: 100%">
+  <th> airline</th>
+  <th> flight number</th>
+  <th> departure time </th>
+  <th> arrival time</th>
+  <th> departure airport</th>
+  <th> arrival airport</th>
+  <th> flight status</th>
+  <th> price</th>
+
+{% for line in data1 %}
+  <tr>
+    <td>{{line[0].airline_name}}</td>
+    <td>{{line[0].flight_num}}</td>
+    <td>{{line[0].departure_time}}</td>
+    <td>{{line[0].arrival_time}}</td>
+      <td>{{line[0].departs}}</td>
+    <td>{{line[0].arrives}}</td>
+    <td>{{line[0].status}}</td
+    <td>{{line[0].price}}</td>
+    <td>{{compute_price(line[0].flight_num,line[0].airline_name,line[0].departure_time)}}</td>
+
+  </tr>
+{% endfor %}
+
+</table>
+<div class="page-header">
+    <h1>Arriving Flights</h1>
+</div>
+
+<table style="width: 100%">
+  <th> airline</th>
+  <th> flight number</th>
+  <th> departure time </th>
+  <th> arrival time</th>
+  <th> departure airport</th>
+  <th> arrival airport</th>
+  <th> flight status</th>
+  <th> price</th>
+
+{% for line in data2 %}
+  <tr>
+    <td>{{line[0].airline_name}}</td>
+    <td>{{line[0].flight_num}}</td>
+    <td>{{line[0].departure_time}}</td>
+    <td>{{line[0].arrival_time}}</td>
+      <td>{{line[0].departs}}</td>
+    <td>{{line[0].arrives}}</td>
+    <td>{{line[0].status}}</td
+    <td>{{line[0].price}}</td>
+    <td>{{compute_price(line[0].flight_num,line[0].airline_name,line[0].departure_time)}}</td>
+
+  </tr>
+{% endfor %}
+
+</table>
+
+<div class="container">
+    <a href="{{url_for('public.buy_or_book') }}"> Purchase or Book a Flight</a>
+    </div>
+{% endblock %}

@@ -16,14 +16,6 @@
   <th> arrival airport</th>
   <th> flight status</th>
   <th> price</th>
-  <!--<th>flight_num</th>-->
-  <!--<th>departure_time</th>-->
-  <!--<th>departs</th>-->
-  <!--<th>arrival_time</th>-->
-  <!--<th>arrives</th>-->
-  <!--<th>airline_name</th>-->
-  <!--<th>Dep</th>-->
-  <!--<th>Arr</th>-->
 
 {% for line in data %}
   <tr>
@@ -35,10 +27,13 @@
     <td>{{line[0].arrives}}</td>
     <td>{{line[0].status}}</td
     <td>{{line[0].price}}</td>
+    <td>{{compute_price(line[0].flight_num,line[0].airline_name,line[0].departure_time)}}</td>
 
   </tr>
 {% endfor %}
 
 </table>
-
+<div class="container">
+    <a href="{{url_for('public.buy_or_book') }}"> Purchase or Book a Flight</a>
+    </div>
 {% endblock %}

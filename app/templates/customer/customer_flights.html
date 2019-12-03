@@ -18,6 +18,10 @@
 
   <th>Arrival</th>
 
+  <th>Customer</th>
+
+  <th>Date</th>
+
 {% for line in data %}
   <tr>
 
@@ -28,6 +32,10 @@
       <td>{{line[2].departure_time}}</td>
 
       <td>{{line[2].arrival_time}}</td>
+
+      <td>{{line[1].email_customer}}</td>
+
+      <td>{{line[1].date}}</td>
 
   </tr>
 {% endfor %}
