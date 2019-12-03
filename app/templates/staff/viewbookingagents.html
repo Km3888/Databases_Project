@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}View Booking Agents{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>View Booking Agents</h1>
+</div>
+staff_airline={{staff_airline}}<br>
+<table>
+  <th>email_booking</th>
+  <th>date</th>
+  <th>airline_name</th>
+
+{% for line in agent_purchased_ticket %}
+  <tr>
+    <td>{{line.email_booking}}</td>
+    <td>{{line.date}}</td>
+    <td>{{line.airline_name}}</td>
+  </tr>
+{% endfor %}
+
+<table>
+  <th>email_booking</th>
+  <th>date</th>
+  <th>airline_name</th>
+
+{% for line in agent_purchased_ticket_30_days %}
+  <tr>
+    <td>{{line.email_booking}}</td>
+    <td>{{line.date}}</td>
+    <td>{{line.airline_name}}</td>
+  </tr>
+{% endfor %}
+
+
+{% endblock %}

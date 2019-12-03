@@ -1,5 +1,5 @@
 import os
-import redis
+#import redis
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -14,8 +14,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Flask-Session
-    SESSION_TYPE = os.environ.get('SESSION_TYPE') or 'redis'
-    SESSION_REDIS = redis.from_url(os.environ.get('SESSION_REDIS'))
+    #SESSION_TYPE = os.environ.get('SESSION_TYPE') or 'redis'
+    #SESSION_REDIS = redis.from_url(os.environ.get('SESSION_REDIS'))
     @staticmethod
     def init_app(app):
         pass
