@@ -185,8 +185,6 @@ class Ticket(db.Model):
         db.ForeignKeyConstraint(['airline_name','flight_num','departure_time'],
                                 ['flight.airline_name','flight.flight_num','flight.departure_time'])
     ,)
-    #how to handle backref for super fucked foreign key constraints
-
 
 
 class Purchase(db.Model):
@@ -211,4 +209,4 @@ def load_user(user_id):
         return Customer.query.filter_by(email=actual_id).first()
     if t=='s':
         return Airline_Staff.query.filter_by(username=actual_id).first()
-    raise Exception('SOMETHING HAPPENED')
+    raise Exception('invalid user type')
