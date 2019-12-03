@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_moment import Moment
 from config import config
 from flask_login import LoginManager
-from flask_session import Session
+# from flask_session import Session
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.auth'  #route for auth page prefixed with auth blueprint name
@@ -13,7 +13,7 @@ login_manager.login_view = 'auth.auth'  #route for auth page prefixed with auth 
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 moment=Moment()
-session=Session()
+# session=Session()
 
 from .models import BookingAgent
 
@@ -26,7 +26,7 @@ def create_app(config_name):
     db.init_app(app)
     login_manager.init_app(app)
     moment.init_app(app)
-    session.init_app(app)
+#    session.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
