@@ -27,7 +27,7 @@ def myflights():
     for x in data:
         print(x[2].departs)
 
-    return render_template('customer/customer_flights.html',data=data)
+    return render_template('customer/passenger_list.html',data=data)
 
 #TODO
 @customer.route('/browse_flights',methods=['GET','POST'])

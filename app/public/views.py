@@ -40,7 +40,7 @@ def searchfutureflights():
 def buy_or_book():
     if not current_user.is_authenticated or current_user.get_type()=='staff':
         flash('Must be logged in as customer or booking agent')
-        return redirect('/main.index')
+        return redirect('main.index')
     if current_user.get_type()=='customer':
         return redirect('/customer/confirm_purchase')
     if current_user.get_type()=='agent':
