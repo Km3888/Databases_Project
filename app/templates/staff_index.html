@@ -25,9 +25,19 @@
   <a href="{{ url_for('staff.add_flight') }}">Add Flight</a>
 </div>
 <div class="container">
-  <a href="{{ url_for('staff.add_flight') }}">Add Airport</a>
+  <a href="{{ url_for('staff.add_airport') }}">Add Airport</a>
 </div>
 <div class="container">
   <a href="{{ url_for('staff.frequent_customers') }}">View Frequent Customers</a>
 </div>
+<div class="container">
+  <a href="{{ url_for('staff.top_destinations') }}">Top Destinations</a>
+</div>
+<div class="container">
+  <a href="{{ url_for('staff.airline_flights') }}">Your Airline's Flights</a>
+</div>
+<div class="container">
+  <a href="{{ url_for('staff.passenger_list') }}">Find Passenger List of a Flight</a>
+</div>
+
 {% endblock %}

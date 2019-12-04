@@ -117,7 +117,7 @@ class Airline_Staff(UserMixin,db.Model):
     def get_id(self):
         return 's_'+self.username
 
-    def get_identifer(self):
+    def get_identifier(self):
         return self.username
 
     def get_type(self):

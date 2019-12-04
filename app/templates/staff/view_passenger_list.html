@@ -1,0 +1,20 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}GloboTravel - Passenger List{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Passengers on Flight:</h1>
+</div>
+<table style="width: 100%">
+  <th> email</th>
+
+{% for line in data %}
+  <tr>
+    <td>{{line[0]}}</td>
+
+  </tr>
+{% endfor %}
+</table>
+{% endblock %}

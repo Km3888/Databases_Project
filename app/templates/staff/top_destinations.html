@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}GloboTravel - Top Destintations{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Last 90 days</h1>
+</div>
+
+<table style="width: 100%">
+  <th> Destination</th>
+  <th> Total Trips </th>
+
+{% for line in top_90 %}
+  <tr>
+    <td>{{line[0]}}</td>
+    <td>{{line[1]}}</td>
+
+  </tr>
+{% endfor %}
+</table>
+
+<div class="page-header">
+    <h1>Last Year</h1>
+</div>
+
+<table style="width: 100%">
+  <th> Destination</th>
+  <th> Total Trips </th>
+
+{% for line in top_365 %}
+  <tr>
+    <td>{{line[0]}}</td>
+    <td>{{line[1]}}</td>
+
+  </tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}GloboTravel - Your Airline's Flights{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Search Results</h1>
+</div>
+<table style="width: 100%">
+  <th> airline</th>
+  <th> flight number</th>
+  <th> departure time </th>
+  <th> arrival time</th>
+  <th> departure airport</th>
+  <th> arrival airport</th>
+  <th> flight status</th>
+
+{% for line in data %}
+  <tr>
+    <td>{{line[0].airline_name}}</td>
+    <td>{{line[0].flight_num}}</td>
+    <td>{{line[0].departure_time}}</td>
+    <td>{{line[0].arrival_time}}</td>
+      <td>{{line[0].departs}}</td>
+    <td>{{line[0].arrives}}</td>
+    <td>{{line[0].status}}</td
+    <td>{{line[0].price}}</td>
+
+  </tr>
+{% endfor %}
+
+</table>
+<div class="container">
+    <a href="{{url_for('public.buy_or_book') }}"> Purchase or Book a Flight</a>
+    </div>
+{% endblock %}

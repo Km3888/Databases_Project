@@ -42,7 +42,7 @@ def my_flights():
         Ticket.ticket_id==Purchase.ticket_id).join(Flight, Ticket.airline_name==Flight.airline_name)\
         .filter(Purchase.email_booking==current_user.get_identifier()).filter(Flight.departure_time >= datetime.now()).filter(Ticket.flight_num==Flight.flight_num).\
         filter(Ticket.departure_time==Flight.departure_time)
-    return render_template('customer/customer_flights.html',data=data)
+    return render_template('customer/passenger_list.html',data=data)
 
 @agent.route('/book_flight',methods=['GET','POST'])
 def book_flight():
