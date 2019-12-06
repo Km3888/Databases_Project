@@ -1,44 +1,50 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}View Flight Ratings{% endblock %}
+{% block title %}Ratings and Comments{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>View Flight Ratings</h1>
+    <h1>Ratings and Comments</h1>
 </div>
 
-<h2>Average Flight Ratings</h2>
-<h3>Flights with no ratings will not appear</h3>
+<div>
 <table>
+  <th>ticket_id</th>
   <th>airline_name</th>
   <th>flight_num</th>
   <th>departure_time</th>
   <th>rating</th>
   <th>comment</th>
-  <th>ave_rating</th>
-{% for line in ave_ticket_ratings %}
+{% for line in past_flights %}
   <tr>
+    <td>{{line.ticket_id}}</td>
     <td>{{line.airline_name}}</td>
     <td>{{line.flight_num}}</td>
     <td>{{line.departure_time}}</td>
     <td>{{line.rating}}</td>
     <td>{{line.comment}}</td>
-    <td>{{line.ave_rating}}</td>
   </tr>
 {% endfor %}
-</table>
+</div>
 
-<h2>Flight Ratings and Comments</h2>
-<h3>Flights with no rating and no comment will not appear</h3>
+
+
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+
+<!-- <div>
 <table>
+  <th>ticket_id</th>
   <th>airline_name</th>
   <th>flight_num</th>
   <th>departure_time</th>
   <th>rating</th>
   <th>comment</th>
-{% for line in ticket_rating_comment %}
+{% for line in check %}
   <tr>
+    <td>{{line.ticket_id}}</td>
     <td>{{line.airline_name}}</td>
     <td>{{line.flight_num}}</td>
     <td>{{line.departure_time}}</td>
@@ -46,5 +52,8 @@
     <td>{{line.comment}}</td>
   </tr>
 {% endfor %}
+</div> -->
+
+
 
 {% endblock %}
