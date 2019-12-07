@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Revenue Comparison{% endblock %}
+
+{% block page_content %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JavaScript Bar Chart</title>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+  </head>
+  <body>
+    <div class="page-header">
+        <h1>Revenue Comparison</h1>
+    </div>
+
+    <h3>Revenue Comparison (Last Month)</h3>
+
+    {{cust_last_month}}
+
+    {{cust_last_month_value}}
+    <!-- <table>
+      <th>sum_month_cust</th>
+    {% for line in cust_last_month %}
+      <tr>
+        <td>{{line.sum_month_cust}}</td>
+      </tr>
+    {% endfor %}
+    </table> -->
+
+    <table>
+      <th>sum_month_book</th>
+    {% for line in booking_last_month %}
+      <tr>
+        <td>{{line.sum_month_book}}</td>
+      </tr>
+    {% endfor %}
+    </table>
+
+
+    <center>
+      <div>
+      <canvas id="last_month" width="600" height="400"></canvas>
+      <script>
+
+        var pieData = [
+          {% for item, label, colors in set_month %}
+            {
+              value: {{item}},
+              label: "{{label}}",
+              color : "{{colors}}"
+            },
+          {% endfor %}
+        ];
+
+        // get bar chart canvas
+        var mychart = document.getElementById("last_month").getContext("2d");
+        steps = 10
+        max = {{ max_month }}
+        // draw pie chart
+        new Chart(document.getElementById("last_month").getContext("2d")).Pie(pieData);
+
+      </script>
+      </div>
+    </center>
+
+    <h3>Revenue Comparison (Last Year)</h3>
+    <center>
+      <div>
+      <canvas id="last_year" width="600" height="400"></canvas>
+      <script>
+
+        var pieData = [
+          {% for item, label, colors in set_year %}
+            {
+              value: {{item}},
+              label: "{{label}}",
+              color : "{{colors}}"
+            },
+          {% endfor %}
+        ];
+
+        // get bar chart canvas
+        var mychart = document.getElementById("last_year").getContext("2d");
+        steps = 10
+        max = {{ max_year }}
+        // draw pie chart
+        new Chart(document.getElementById("last_year").getContext("2d")).Pie(pieData);
+
+      </script>
+      </div>
+    </center>
+  </body>
+</html>
+
+
+{% endblock %}

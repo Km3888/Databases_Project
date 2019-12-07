@@ -7,14 +7,52 @@ from ..models import Customer,BookingAgent,Airline_Staff,Airline,Ticket,Purchase
 from .forms import ConfirmPurchaseForm,CommissionForm,PurchaseFlightForm
 from datetime import datetime,timedelta
 from sqlalchemy.sql import func
+from sqlalchemy.sql import desc
 
 
-@agent.route('/stats',methods=['GET','POST'])
-def stats():
-    data=db.session.query(Purchase).all()
-    
+@agent.route('/topcustomers',methods=['GET','POST'])
+def topcustomers():
+
+    date_six_months_ago=datetime.now()-timedelta(days=180)
+    date_year_ago=datetime.now()-timedelta(days=365)
+    top_num_tickets=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).add_columns(Purchase.email_customer, Purchase.email_booking, Ticket.ticket_id).with_entities(Purchase.email_customer, func.count(Ticket.ticket_id).label('count_tickets')).group_by(Purchase.email_customer).filter(Purchase.email_booking==current_user.get_identifier()).filter(Purchase.date>date_six_months_ago).order_by(desc("count_tickets"))[:5]
+
+    # make list of customer names
+    # make list of number of tickets puchased
+
+    customers=[]
+    num_tickets=[]
+
+    for line in top_num_tickets:
+        cust=line.email_customer
+        tick=line.count_tickets
+        customers.append(cust)
+        num_tickets.append(tick)
+
+    top_commissions=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                        .add_columns(Purchase.email_customer, Purchase.email_booking, Ticket.ticket_id, Ticket.price)\
+                        .with_entities(Purchase.email_customer, (func.sum(Ticket.price)/10).label('sum_commissions'))\
+                        .group_by(Purchase.email_customer).filter(Purchase.email_booking==current_user.get_identifier())\
+                        .filter(Purchase.date>date_year_ago).order_by(desc("sum_commissions"))[:5]
+
+    com_customers=[]
+    list_commissions=[]
+
+    for line in top_commissions:
+        cust=line.email_customer
+        com=line.sum_commissions
+        com_customers.append(cust)
+        list_commissions.append(com)
+
     # query=Purchase.query.filter_by(email_booking = current_user.get_identifier()).join(Ticket).all()
-    return render_template('public/view_searchfutureflights.html',data=data)
+    return render_template('agent/viewtopcustomers.html',top_num_tickets=top_num_tickets,\
+                                                            customers=customers,\
+                                                            num_tickets=num_tickets,\
+                                                            top_commissions=top_commissions,\
+                                                            com_customers=com_customers,\
+                                                            list_commissions=list_commissions,\
+                                                            max=max(num_tickets),\
+                                                            max_comm=max(list_commissions))
 
 @agent.route('/your_commission',methods=['GET','POST'])
 def your_commission():

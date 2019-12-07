@@ -19,3 +19,18 @@ class ConfirmPurchaseForm(FlaskForm):
     card_name=StringField('Card Holder Name')
     confirmation_code=StringField('Confirmation Code',validators=[Length(3,3)])
     submit = SubmitField('Confirm Purchase')
+
+class CompletedFlights(FlaskForm):
+    airline_name=StringField('Airline name', validators=[DataRequired('Please enter an airline name'), Length(1, 64)])
+    flight_num = IntegerField('Flight number', validators=[DataRequired('Please enter a flight number')])
+    departure=DateTimeLocalField('Departure Date and Time',validators=[DataRequired('Please enter a departure')],format='%Y-%m-%dT%H:%M')
+    rating=IntegerField('Rate out of 5')
+    comment=StringField('Comment')
+    submit = SubmitField('Submit')
+
+class SpendingForm(FlaskForm):
+    start=DateField("Start", format="%Y-%m-%d",\
+            validators=[DataRequired()])
+    end=DateField("End", format="%Y-%m-%d",\
+            validators=[DataRequired()]),
+    submit = SubmitField('Display Spending')

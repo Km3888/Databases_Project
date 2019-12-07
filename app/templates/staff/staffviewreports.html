@@ -1,11 +1,7 @@
-{% extends "index.html" %}
+{% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-<!-- <script type="text/javascript"> -->
-<!-- import Chart from 'chart.js'; -->
-<!-- <script src="path/to/chartjs/dist/Chart.js"></script> -->
-<!-- import Chart from 'chart.js'; -->
-{% block title %}Track your Spending{% endblock %}
+{% block title %}Reports{% endblock %}
 
 {% block page_content %}
 <!DOCTYPE html>
@@ -15,19 +11,19 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
   </head>
 
+<body>
+  <div class="page-header">
+      <h1>Reports</h1>
+  </div>
 
-  <body>
-    <div class="page-header">
-        <h1>Spending</h1>
-    </div>
-    <h3>Total Amount:</h3>
-    Total Amount last year: {{default_total_sum}} <br>
+  <h3>Tickets Sold</h3>
 
-    {{monthly_sums}}<br>
-    {{query_list_months}}<br>
-    {{graph_labels}}<br>
+  Tickets sold last month: {{num_sold_last_month}}<br>
 
-    <center>
+  Tickets sold last year: {{num_sold_last_year}}<br>
+
+
+  <center>
       <div id="defaultchart">
       <canvas id="default_chart" width="600" height="400"></canvas>
       <script>
@@ -50,7 +46,7 @@
             }
           ]
         }
-       // get bar chart canvas
+         // get bar chart canvas
        var mychart = document.getElementById("default_chart").getContext("2d");
          steps = 10
          max = {{max_default}}
@@ -70,11 +66,12 @@
       </div>
     </center>
 
-    <h3>Enter the dates you want to calculate your spending for: </h3>
+    <h3>Enter the dates you want to view your report for: </h3>
 
     <div class="col-md-4">
       {{ wtf.quick_form(form) }}
     </div>
+
 
 
 

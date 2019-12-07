@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Top Customers{% endblock %}
+
+{% block page_content %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JavaScript Bar Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+  </head>
+  <body>
+
+    <div class="page-header">
+        <h1>Top Customers </h1>
+    </div>
+
+    <h3>Top Customers from Tickets Bought in last 6 months</h3>
+
+    <table>
+        <th>email_customer</th>
+        <th>count_tickets</th>
+
+      {% for line in top_num_tickets %}
+        <tr>
+          <td>{{line.email_customer}}</td>
+          <td>{{line.count_tickets}}</td>
+        </tr>
+      {% endfor %}
+      </table>
+
+    {{customers}}<br>
+    {{num_tickets}}<br>
+
+    <center>
+      <div id="top_num_tickets">
+      <canvas id="chart" width="600" height="400"></canvas>
+      <script>
+        // bar chart data
+        var barData = {
+          labels : [
+            {% for item in customers %}
+             "{{ item }}",
+            {% endfor %}
+    ],
+          datasets : [{
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            data : [
+              {% for item in num_tickets %}
+                 "{{ item }}",
+                {% endfor %}
+        ]
+            }
+          ]
+        }
+       // get bar chart canvas
+       var mychart = document.getElementById("chart").getContext("2d");
+         steps = 10
+         max = {{max}}
+       // draw bar chart
+       new Chart(mychart).Bar(barData, {
+         scaleOverride: true,
+         scaleSteps: steps,
+         scaleStepWidth: Math.ceil(max / steps),
+         scaleStartValue: 0,
+         scaleShowVerticalLines: true,
+         scaleShowGridLines : true,
+         barShowStroke : true,
+         scaleShowLabels: true
+         }
+       );
+
+      </script>
+      </div>
+    </center>
+
+    <h3>Top Customers from Commission in last year</h3>
+    <table>
+        <th>email_customer</th>
+        <th>sum_commissions</th>
+
+      {% for line in top_commissions %}
+        <tr>
+          <td>{{line.email_customer}}</td>
+          <td>{{line.sum_commissions}}</td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    {{com_customers}}<br>
+    {{list_commissions}}<br>
+
+    <center>
+      <div id="top_commissions">
+      <canvas id="chart_top_commissions" width="600" height="400"></canvas>
+      <script>
+        // bar chart data
+        var barData = {
+          labels : [
+            {% for item in com_customers %}
+             "{{ item }}",
+            {% endfor %}
+    ],
+          datasets : [{
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            data : [
+              {% for item in list_commissions %}
+                 "{{ item }}",
+                {% endfor %}
+        ]
+            }
+          ]
+        }
+       // get bar chart canvas
+       var mychart = document.getElementById("chart_top_commissions").getContext("2d");
+         steps = 10
+         max = {{max_comm}}
+       // draw bar chart
+       new Chart(mychart).Bar(barData, {
+         scaleOverride: true,
+         scaleSteps: steps,
+         scaleStepWidth: Math.ceil(max / steps),
+         scaleStartValue: 0,
+         scaleShowVerticalLines: true,
+         scaleShowGridLines : true,
+         barShowStroke : true,
+         scaleShowLabels: true
+         }
+       );
+
+      </script>
+      </div>
+    </center>
+
+
+
+  </body>
+</html>
+
+
+{% endblock %}
