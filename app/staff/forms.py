@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField,Select
 from wtforms.fields.html5 import DateTimeLocalField,DateField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
-from ..models import Flight
+from ..models import Flight,Purchase,Ticket
 
 
 class ChangeStatusForm(FlaskForm):
@@ -50,3 +50,10 @@ class PassengerListForm(FlaskForm):
     flight_num = IntegerField('Flight Num', validators=[DataRequired()])
     departure_time = DateTimeLocalField('Departure Time', validators=[DataRequired()],format='%Y-%m-%dT%H:%M')
     submit = SubmitField('Get Passenger List')
+
+class ReportForm(FlaskForm):
+    start=DateField("Start", format="%Y-%m-%d",\
+            validators=[DataRequired()])
+    end=DateField("End", format="%Y-%m-%d",\
+            validators=[DataRequired()])
+    submit = SubmitField('Display Report')

@@ -5,7 +5,7 @@
 <!-- import Chart from 'chart.js'; -->
 <!-- <script src="path/to/chartjs/dist/Chart.js"></script> -->
 <!-- import Chart from 'chart.js'; -->
-{% block title %}Track your Spending{% endblock %}
+{% block title %}View your Report{% endblock %}
 
 {% block page_content %}
 <!DOCTYPE html>
@@ -18,23 +18,24 @@
 
   <body>
     <div class="page-header">
-        <h1>Spending</h1>
+        <h1>Reports</h1>
     </div>
-    <h3>Total Amount:</h3>
-    Total Amount last year: {{default_total_sum}} <br>
+    <!-- <h3>Total Amount Spent:</h3> -->
+    Total Tickets Bought from {{start_date}} (excluded) to {{end_date}} (included): {{period_table_count}} <br>
 
-    {{monthly_sums}}<br>
-    {{query_list_months}}<br>
-    {{graph_labels}}<br>
+    {{counts}}<br>
+    {{query_ranges}}<br>
+    {{ranges_labels}}<br>
 
     <center>
-      <div id="defaultchart">
-      <canvas id="default_chart" width="600" height="400"></canvas>
+
+      <div id="reportchart">
+      <canvas id="report_chart" width="600" height="400"></canvas>
       <script>
         // bar chart data
         var barData = {
           labels : [
-            {% for item in graph_labels %}
+            {% for item in ranges_labels %}
              "{{ item }}",
             {% endfor %}
     ],
@@ -43,7 +44,7 @@
             strokeColor: "rgba(151,187,205,1)",
             pointColor: "rgba(151,187,205,1)",
             data : [
-              {% for item in monthly_sums %}
+              {% for item in counts %}
                  "{{ item }}",
                 {% endfor %}
         ]
@@ -51,9 +52,9 @@
           ]
         }
        // get bar chart canvas
-       var mychart = document.getElementById("default_chart").getContext("2d");
+       var mychart = document.getElementById("report_chart").getContext("2d");
          steps = 10
-         max = {{max_default}}
+         max = {{max_ranges}}
        // draw bar chart
        new Chart(mychart).Bar(barData, {
          scaleOverride: true,
@@ -69,13 +70,6 @@
       </script>
       </div>
     </center>
-
-    <h3>Enter the dates you want to calculate your spending for: </h3>
-
-    <div class="col-md-4">
-      {{ wtf.quick_form(form) }}
-    </div>
-
 
 
   </body>

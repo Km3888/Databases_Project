@@ -1,10 +1,10 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash,session
 # session
 from flask_login import login_user, logout_user, login_required, \
     current_user
 from . import customer
 from .. import db
-from .forms import PurchaseFlightForm,ConfirmPurchaseForm
+from .forms import SpendingForm,PurchaseFlightForm,ConfirmPurchaseForm,CompletedFlights
 from ..models import Customer,BookingAgent,Airline_Staff,Airline,load_user,Flight, Ticket,Purchase,Airplane
 
 from datetime import datetime,date, timedelta
@@ -12,6 +12,8 @@ from datetime import datetime,date, timedelta
 from sqlalchemy.sql import func
 from sqlalchemy.sql import select
 from sqlalchemy.sql import table, column
+
+import json
 
 
 
@@ -134,80 +136,212 @@ def confirm_purchase():
 #TODO
 @customer.route('/ratings',methods=['GET','POST'])
 def ratings():
-    pass
+    # display completed flights of that user on the form page
+    #completedflights=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).add_columns(Ticket.airline_name, Ticket.flight_num, Ticket.departure_time)   Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:])
+    # display past ratings and comments
 
-# for parsing by month
-def return_starts_int(end_date, start_date=None, num_months=None):
-    l_to_reverse=[]
-    d=end_date
-    last=str(d.year)+'-'+str(d.month)+'-01'
-    last_start=datetime.strptime(last, '%Y-%m-%d')
-    l_to_reverse.append(last_start)
+    if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        return redirect(url_for('main.index'))
 
-    # l_to_reverse.append('one')
-    list_of_dates=[]
-
-    year=int(d.year)
-    month=int(d.month)
-    end='-01'
-
-    first_date=str(month)+'-'+str(year)
-
-    list_of_dates.append(first_date)
-
-    if num_months!=None:
-        count=1
-        while count<num_months:
-            if month!=1:
-                most_recent=str(year)+'-'+str(month-1)+'-01'
-                #print(most_recent)
-                date_most_recent=datetime.strptime(most_recent, '%Y-%m-%d')
-                print(date_most_recent)
-                l_to_reverse.append(date_most_recent)
-                month-=1
-                str_date=str(month)+'-'+str(year)
-                list_of_dates.append(str_date)
-                count+=1
-            elif month==1:
-                year-=1
-                month=13
-                most_recent=str(year)+'-'+str(month-1)+'-01'
-                #print(most_recent)
-                date_most_recent=datetime.strptime(most_recent, '%Y-%m-%d')
-                print(date_most_recent)
-                l_to_reverse.append(date_most_recent)
-                month-=1
-                str_date=str(month)+'-'+str(year)
-                list_of_dates.append(str_date)
-                count+=1
+    past_flights=Ticket.query.join(Purchase, Ticket.ticket_id==Purchase.ticket_id)\
+                            .join(Flight, Ticket.airline_name==Flight.airline_name)\
+                            .add_columns(Ticket.airline_name.label("airline_name"),\
+                            Ticket.ticket_id.label("ticket_id"),\
+                            Ticket.flight_num.label("flight_num"),\
+                            Ticket.departure_time.label("departure_time"),\
+                            Purchase.rating.label("rating"),\
+                            Purchase.comment.label("comment"))\
+                            .filter(Flight.arrival_time<datetime.now())\
+                            .filter(Purchase.email_customer==current_user.get_identifier())\
+                            .filter(Ticket.departure_time==Flight.departure_time)\
+                            .filter(Ticket.flight_num==Flight.flight_num)
+    #result=past_flights.ticket_id
 
 
-    l_to_reverse.reverse()
-    list_of_dates.reverse()
-    return [l_to_reverse,list_of_dates]
+    form = CompletedFlights()
+    if form.validate_on_submit():
+
+        if form.rating.data is not None and (form.rating.data<0 or form.rating.data>5):
+            flash('Please enter a rating between 0 and 5')
+            #return render_template('customer/selecttorate.html', past_flights=past_flights, form=form)
+
+        airline_name=form.airline_name.data
+        flight_num=form.flight_num.data
+        departure_time=form.departure.data
 
 
 
+        check=db.session.query(Purchase)\
+                        .join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                        .join(Flight, Ticket.flight_num==Flight.flight_num)\
+                        .filter(Ticket.airline_name==Flight.airline_name)\
+                        .filter(Ticket.departure_time==Flight.departure_time)\
+                        .filter(Purchase.email_customer==current_user.get_identifier())\
+                        .filter(Flight.arrival_time<datetime.now())\
+                        .filter(Flight.airline_name==airline_name)\
+                        .filter(Flight.flight_num==flight_num)\
+                        .filter(Flight.departure_time==departure_time).first()
 
-#TODO
+        # flight=db.session.query(Flight).filter_by(airline_name=airline_name,flight_num=flight_num,departure_time=departure_time).first()
+        # if flight is not None:
+        #     flight.status=form.new_status.data
+        #     db.session.commit()
+        #     flash('Updated status to:'+form.new_status.data)
+        #
+        # purchased_flight=db
+        #
+        if check is not None:
+
+            tick=check.ticket_id
+            purchased_flight=db.session.query(Purchase).filter_by(ticket_id=tick).first()
+            if form.rating.data is not None and form.rating.data>0 and form.rating.data<=5:
+                purchased_flight.rating=form.rating.data
+                db.session.commit()
+                flash('Rating Updated to '+str(form.rating.data))
+            else:
+                flash('Rating Not Updated')
+            if form.comment.data is not None:
+                purchased_flight.comment=form.comment.data
+                db.session.commit()
+                flash('Comment Updated to '+form.comment.data)
+
+
+
+        # db.session.add(check)
+        # db.commit()
+        # session['ticket_id']=ticket_id
+
+
+        #
+        # if check is not None:
+        #
+        #
+        #     return redirect('rate')
+        #     # create new form to comment
+        #     # do return redirect to page to comment
+        #
+        # flash('Flight not completed')
+            return redirect(url_for('main.index'))
+
+
+    return render_template('customer/selecttorate.html', past_flights=past_flights, form=form)
+
+
+## for parsing by 30 days
+
+
+
+## for parsing by 30 days
+def intervals_for_range(end_date, start_date):
+    # full end date aka next day
+    end_date=end_date+timedelta(days=1)
+    clean_end_date=str(end_date.year)+'-'+str(end_date.month)+'-'+str(end_date.day)
+    clean_end_date=datetime.strptime(clean_end_date, '%Y-%m-%d')
+
+    list_for_query_comparisons=[]
+
+    clean_start_date=str(start_date.year)+'-'+str(start_date.month)+'-'+str(start_date.day)
+
+    clean_start_date=datetime.strptime(clean_start_date, '%Y-%m-%d')
+
+    list_for_query_comparisons.append(clean_start_date)
+
+    days=(clean_end_date-clean_start_date).days
+
+    full_months=int(days//30)
+
+    for i in range(full_months):
+        clean_start_date+=timedelta(days=31)
+        list_for_query_comparisons.append(clean_start_date)
+
+    if list_for_query_comparisons[-1]!=clean_end_date:
+        list_for_query_comparisons.append(clean_end_date)
+
+
+    return list_for_query_comparisons
+
+def intervals_for_num_months(end_date, num_months):
+    # full end date aka next day
+
+    end_date=end_date+timedelta(days=1)
+    clean_end_date=str(end_date.year)+'-'+str(end_date.month)+'-'+str(end_date.day)
+    clean_end_date=datetime.strptime(clean_end_date, '%Y-%m-%d')
+
+    list_for_query_comparisons=[]
+    list_for_query_comparisons.append(clean_end_date)
+
+    year=clean_end_date.year
+    month=clean_end_date.month
+    day=clean_end_date.day
+
+    count=0
+    while count<num_months:
+        if month!=1:
+
+            past=str(year)+'-'+str(month-1)+'-'+str(day)
+            date_past=datetime.strptime(past, '%Y-%m-%d')
+
+            list_for_query_comparisons.append(date_past)
+
+            month-=1
+            count+=1
+        elif month==1:
+            year-=1
+            month=13
+            past=str(year)+'-'+str(month-1)+'-'+str(day)
+
+            date_past=datetime.strptime(past, '%Y-%m-%d')
+
+            list_for_query_comparisons.append(date_past)
+            month-=1
+            count+=1
+
+    list_for_query_comparisons.reverse()
+
+    return list_for_query_comparisons
+
+def make_list_labels(times_list):
+
+    intervals=[]
+
+    if len(times_list)==2:
+        interval=""
+        start=str(times_list[0])
+        interval+=start[:10]
+        interval+=' to '
+        end=times_list[1]-timedelta(days=1)
+
+        end=str(end)
+        interval+=end[:10]
+        intervals.append(interval)
+
+
+    else:
+
+        for i in range(len(times_list)-1):
+            interval=""
+            start=str(times_list[i])
+            interval+=start[:10]
+            interval+=' to '
+            end=times_list[i+1]-timedelta(days=1)
+            end=str(end)
+            interval+=end[:10]
+            intervals.append(interval)
+
+
+    return intervals
+
 @customer.route('/spending',methods=['GET','POST'])
 def spending():
     # default part
     # date one year ago
     one_year_ago = datetime.now() - timedelta(days=365)
 
-    # all purchases
-    purchased_ticket=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).add_columns(Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:])
-    # test of sum for all purchases
-    total_overall=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).first()
-    total_overall_value=total_overall.all_sum
-
-    if total_overall_value==None:
-        total_overall_value=0
-        total_overall=0
-
     # table purchases within past year
-    default_total_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).add_columns(Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).filter(Purchase.date>one_year_ago)
+    default_total_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                                .add_columns(Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price'))\
+                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.date>one_year_ago)
     # sum for all purchases last year
     default_total_sum_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).filter(Purchase.date>one_year_ago).first()
     default_total_sum=default_total_sum_table.all_sum
@@ -215,55 +349,95 @@ def spending():
     if default_total_sum==None:
         default_total_sum=0
 
-    default_list_start_months=return_starts_int(datetime.now(), None, num_months=6)
+    query_list_months=intervals_for_num_months(datetime.now(), 6)
 
-    sums=[]
+    graph_labels=make_list_labels(query_list_months)
 
-    for i in range(len(default_list_start_months[0])-1):
-        default_month=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).filter(Purchase.date>=default_list_start_months[0][i]).filter(Purchase.date<default_list_start_months[0][i+1]).first()
+    monthly_sums=[]
+
+    for i in range(len(query_list_months)-1):
+        default_month=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                                .with_entities(func.sum(Ticket.price).label('all_sum'))\
+                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.date>query_list_months[i])\
+                                .filter(Purchase.date<query_list_months[i+1]).first()
         default_month_sum=default_month.all_sum
         if default_month_sum==None:
             default_month_sum=0
-        sums.append(default_month_sum)
 
-    last_month=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).filter(Purchase.date>=default_list_start_months[0][(len(default_list_start_months[0])-1)]).first()
-    last_month_sum=last_month.all_sum
-    if last_month_sum==None:
-        last_month_sum=0
-    sums.append(last_month_sum)
-
-    list_of_dates=default_list_start_months[1]
-
-    # str_list_of_dates=json.dumps(list_of_dates)
-    # for i in list_of_dates:
-    #     new_i=""
-    #     for letter in i:
-    #         new_i+=str(letter)+" "
-    #     str_list_of_dates.append(new_i)
+        monthly_sums.append(default_month_sum)
 
 
 
 
-    rows_for_graph = []
-
-    # for i in list_of_dates:
-    #     i.replace("\'", "\"")
-
-
-    for i in range(len(sums)):
-        pair=[list_of_dates[i],int(sums[i])]
-        rows_for_graph.append(pair)
-    # rows_for_graph=json.dumps(rows_for_graph)
 
 
 
-#users.query.join(friendships, users.id==friendships.user_id).add_columns(users.userId, users.name, users.email, friends.userId, friendId).filter(users.id == friendships.friend_id).filter(friendships.user_id == userID).paginate(page, 1, False)
-    return render_template('customer/spending.html',default_total_sum=default_total_sum,\
-                            default_total_table=default_total_table,\
-                            purchased_ticket=purchased_ticket,\
-                            sums=sums,\
-                            list_of_dates=list_of_dates,\
-                            rows_for_graph=rows_for_graph,\
-                            total_overall_value=total_overall_value)
+    form=SpendingForm()
 
-    #pass
+    if form.validate_on_submit():
+        inputed_start_date=form.start.data
+        start_date=date_past=datetime.strptime(str(inputed_start_date), '%Y-%m-%d')
+        inputed_end_date=form.end.data
+        end_date=date_past=datetime.strptime(str(inputed_end_date), '%Y-%m-%d')
+
+        if end_date<=start_date:
+            flash('Invalid date range')
+
+
+        # sum for all purchases from that period
+        period_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                                .with_entities(func.sum(Ticket.price).label('all_sum'))\
+                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.date>=start_date)\
+                                .filter(Purchase.date<=end_date).first()
+
+
+        period_table_sum=period_table.all_sum
+
+        if period_table_sum==None:
+            period_table_sum=0
+        #query_ranges=intervals_for_range(end_date, start_date-timedelta(seconds=1))
+
+        query_ranges=intervals_for_range(end_date, start_date)
+
+        ranges_labels=make_list_labels(query_ranges)
+
+        sums=[]
+
+        for i in range(len(query_ranges)-1):
+            thrity_days=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                                    .with_entities(func.sum(Ticket.price).label('all_sum'))\
+                                    .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                    .filter(Purchase.date>=query_ranges[i])\
+                                    .filter(Purchase.date<query_ranges[i+1]).first()
+            thrity_days_sums=thrity_days.all_sum
+            if thrity_days_sums==None:
+                thrity_days_sums=0
+
+            sums.append(thrity_days_sums)
+
+
+
+
+
+
+
+
+
+        return render_template('customer/spending_from_form.html',\
+                                period_table_sum=period_table_sum,\
+                                sums=sums,\
+                                query_ranges=query_ranges,\
+                                ranges_labels=ranges_labels,\
+                                max_ranges=max(sums),\
+                                start_date=start_date,end_date=end_date)
+
+
+    return render_template('customer/spending.html',\
+                            default_total_sum=default_total_sum,\
+                            monthly_sums=monthly_sums,\
+                            query_list_months=query_list_months,\
+                            graph_labels=graph_labels,\
+                            max_default=max(monthly_sums),\
+                            form=form)
