@@ -195,7 +195,7 @@ class Purchase(db.Model):
     rating=db.Column(db.Integer())
     comment=db.Column(db.String(300))
     date=db.Column(db.DateTime)
-    card_num=db.Column(db.Integer)
+    card_num=db.Column(db.String)
     card_expiration=db.Column(db.DateTime)
 
 

@@ -29,10 +29,8 @@ def change_flight_status():
         flash('Could not find this flight for your airline')
     return render_template('staff/change_flight_status.html',form=form)
 
-#TODO check add_airplane
 @staff.route('/add_airplane',methods=['GET','POST'])
 def add_airplane():
-    #TODO add_airplane form
     if not current_user.is_authenticated or not current_user.get_type()=='staff':
         flash('You must be logged in as an airline staff for this action')
         return redirect(url_for('main.index'))
@@ -41,11 +39,16 @@ def add_airplane():
         airline_name = db.session.query(Airline_Staff).filter(Airline_Staff.username == current_user.get_identifier()).first().airline_name
         plane_id=form.airplane_id.data
         seat_count=form.seat_count.data
-        plane=db.session.query(Airplane).filter_by(airline_name=airline_name,plane_id=plane_id).first()
+        if seat_count<=0:
+            flash('Airplane must have at least one seat')
+            return render_template('/staff/add_airplane.html',form=form)
+        plane=db.session.query(Airplane).filter_by(airline_name=airline_name,id=plane_id).first()
         if plane is None:
-            new_plane=Airplane(airline_name=airline_name,plane_id=plane_id,seat_count=seat_count)
+            new_plane=Airplane(airline_name=airline_name,id=plane_id,seat_count=seat_count)
             db.session.add(new_plane)
             db.session.commit()
+            flash('You have added plane '+str(plane_id) +' to the system')
+            return redirect(url_for('main.index'))
         flash('There is already a flight with this ID in your airline')
     return render_template('staff/add_airplane.html',form=form)
 
@@ -67,22 +70,28 @@ def add_flight():
         arrives=form.arrives.data
         airplane_id=form.airplane_id.data
 
+        if not departure_time>datetime.now():
+            flash('Flight must be in the future')
+            return render_template('/staff/add_flight.html',form=form)
         flight=db.session.query(Flight).filter_by(airline_name=airline_name,flight_num=flight_num,departure_time=departure_time).first()
         if flight is not None:
             flash('There is already a flight with that number and departure time in your airline')
-            return render_template('staff/add_airplane.html',form=form)
+            return render_template('staff/add_flight.html',form=form)
         airplane=db.session.query(Airplane).filter_by(airline_name=airline_name,id=airplane_id).first()
+        if departure_time>arrival_time:
+            flash('arrival must be after departure')
+            return render_template('staff/add_flight.html', form=form)
         if airplane is None:
             flash('There is no airplane with this id in your airline')
-            return render_template('staff/add_airplane.html',form=form)
+            return render_template('staff/add_flight.html',form=form)
         departs_airport=db.session.query(Airport).filter_by(name=departs).first()
         if departs_airport is None:
             flash('There is no airport with this name(departure airport)')
-            return render_template('staff/add_airplane.html',form=form)
+            return render_template('staff/add_flight.html',form=form)
         arrives_airport = db.session.query(Airport).filter_by(name=arrives).first()
         if arrives_airport is None:
-            flash('There is no airport with this name(departure airport)')
-            return render_template('staff/add_airplane.html',form=form)
+            flash('There is no airport with this name(arrival airport)')
+            return render_template('staff/add_flight.html',form=form)
         new_flight=Flight(airline_name=airline_name,
                           flight_num=flight_num,
                           departure_time=departure_time,
@@ -97,7 +106,7 @@ def add_flight():
         flash('Added Flight')
         return redirect(url_for('main.index'))
 
-    return render_template('staff/add_airplane.html',form=form)
+    return render_template('staff/add_flight.html',form=form)
 
 #TODO check add_airport
 @staff.route('/add_airport',methods=['GET','POST'])
@@ -230,13 +239,15 @@ def passenger_list():
         if flight is not None:
             data=db.session.query(Purchase.email_customer).join(Ticket,Ticket.ticket_id==Purchase.ticket_id).\
                 filter(Ticket.airline_name==airline_name,Ticket.flight_num==flight_num,Ticket.departure_time==departure_time).distinct().all()
-            return render_template('staff/view_passenger_list.html',data=data)#TODO make template
-    #TODO customer_flights form
+            return render_template('staff/view_passenger_list.html',data=data)
     return render_template('staff/passenger_list.html',form=form)
 
 @staff.route('/viewbookingagents',methods=['GET','POST'])
 def viewbookingagents():
-#    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_id().split('_')[1:]).first()
+    if not current_user.is_authenticated or not current_user.get_type() == 'staff':
+        flash('You must be logged in as an airline staff for this action')
+        return redirect(url_for('main.index'))
+    #    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_id().split('_')[1:]).first()
     staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
 
     staff_airline=staff_airline_table.airline_name
@@ -264,11 +275,13 @@ def viewbookingagents():
                             grouped_agent_purchased_ticket_one_year=grouped_agent_purchased_ticket_one_year,\
                             commissions_grouped_agent=commissions_grouped_agent)
 
-# TODO - question for prof
 # each flight average rating
 # all comments and ratings given for that flight by customer
 @staff.route('/viewflightratings',methods=['GET','POST'])
 def viewflightratings():
+    if not current_user.is_authenticated or not current_user.get_type()=='staff':
+        flash('You must be logged in as an airline staff for this action')
+        return redirect(url_for('main.index'))
     staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
 
     staff_airline=staff_airline_table.airline_name
@@ -307,6 +320,7 @@ def viewflightratings():
                             ticket_rating_comment=ticket_rating_comment)
 
 def intervals_for_range(end_date, start_date):
+
     # full end date aka next day
     end_date=end_date+timedelta(days=1)
     clean_end_date=str(end_date.year)+'-'+str(end_date.month)+'-'+str(end_date.day)
@@ -335,6 +349,7 @@ def intervals_for_range(end_date, start_date):
     return list_for_query_comparisons
 
 def intervals_for_num_months(end_date, num_months):
+
     # full end date aka next day
 
     end_date=end_date+timedelta(days=1)
@@ -533,6 +548,9 @@ def staffviewreports():
 
 @staff.route('/revenuecomparison',methods=['GET','POST'])
 def revenuecomparison():
+    if not current_user.is_authenticated or not current_user.get_type()=='staff':
+        flash('You must be logged in as an airline staff for this action')
+        return redirect(url_for('main.index'))
     staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
     staff_airline=staff_airline_table.airline_name
 

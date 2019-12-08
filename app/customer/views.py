@@ -20,20 +20,20 @@ import json
 @customer.route('/myflights',methods=['GET','POST'])
 def myflights():
     if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        flash('You must be logged in as a customer for this action')
         return redirect(url_for('main.index'))
     data=db.session.query(Ticket,Purchase,Flight).join(Purchase,\
         Ticket.ticket_id==Purchase.ticket_id).join(Flight, Ticket.airline_name==Flight.airline_name)\
         .filter(Purchase.email_customer==current_user.get_identifier()).filter(Flight.departure_time >= datetime.now()).filter(Ticket.flight_num==Flight.flight_num).\
         filter(Ticket.departure_time==Flight.departure_time)
-    return render_template('customer/passenger_list.html',data=data)
+    return render_template('customer/customer_flights.html',data=data)
 
-#TODO
-@customer.route('/browse_flights',methods=['GET','POST'])
-def browse_flights():
-    pass
 
 @customer.route('/purchase_flight',methods=['GET','POST'])
 def purchase_flight():
+    if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        flash('You must be logged in as a customer for this action')
+        return redirect(url_for('main.index'))
     form=PurchaseFlightForm()
     if form.validate_on_submit():
         flight=db.session.query(Flight).filter_by(airline_name=form.airline_name.data,
@@ -41,9 +41,9 @@ def purchase_flight():
                                                 departure_time=form.departure.data,
                                       ).first()
         if flight is not None:
-            ticket = db.session.query(Flight, Ticket).join(Ticket, Flight.airline_name == Ticket.airline_name & \
-                                                           Flight.flight_num == Ticket.flight_num & \
-                                                           Flight.departure_time == Ticket.departure_time).all()
+            ticket = db.session.query(Ticket).filter(flight.airline_name == Ticket.airline_name).filter(
+                                                           flight.flight_num == Ticket.flight_num).filter(
+                                                           flight.departure_time == Ticket.departure_time).all()
             num_tickets = len(ticket)
             airplane = db.session.query(Airplane).filter_by(airline_name=flight.airline_name,
                                                             id=flight.airplane_id).first()
@@ -54,23 +54,24 @@ def purchase_flight():
             price = flight.price
             if num_tickets >= .7 * capacity:
                 price *= 1.2
-
             session['price']=price
             session['airline']=form.airline_name.data
             session['flight_num']=form.flight_num.data
             session['departure']=form.departure.data
-            print(session.get('price'))
             return redirect('confirm_purchase')
         flash(u'we need a real flight dawg')
     return render_template('customer/book_flights.html',form=form)
 
 @customer.route('/confirm_purchase',methods=['GET','POST'])
 def confirm_purchase():
+    if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        flash('You must be logged in as a customer for this action')
+        return redirect(url_for('main.index'))
+
     if ('airline' not in session) or ('flight_num' not in session) or ('departure' not in session):
         flash('no flight selected')
         return redirect(url_for('main.index'))
-    print('price:',session.get('price'))
-    airline_name=session.get('airline')
+    airline_name = session.get('airline')
     flight_num = session.get('flight_num')
     departure_time = session.get('departure')
     price=session.get('price')
@@ -98,12 +99,8 @@ def confirm_purchase():
         db.session.add(purchase)
         db.session.commit()
         flash('Purchase successful :)')
-
-        session['airline'] = airline_name
-        session['flight_num'] = flight_num
-        session['departure'] = departure_time
-        session['price'] = price
         return redirect(url_for('main.index'))
+
     flight = db.session.query(Flight).filter_by(airline_name=airline_name,
                                                 flight_num=flight_num,
                                                 departure_time=departure_time,
@@ -129,19 +126,14 @@ def confirm_purchase():
 
 
 
-
-    #2020-05-05 14:56:00
-
-
-#TODO
 @customer.route('/ratings',methods=['GET','POST'])
 def ratings():
+    if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        flash('You must be logged in as a customer for this action')
+        return redirect(url_for('main.index'))
     # display completed flights of that user on the form page
     #completedflights=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).add_columns(Ticket.airline_name, Ticket.flight_num, Ticket.departure_time)   Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:])
     # display past ratings and comments
-
-    if not current_user.is_authenticated or not current_user.get_type()=='customer':
-        return redirect(url_for('main.index'))
 
     past_flights=Ticket.query.join(Purchase, Ticket.ticket_id==Purchase.ticket_id)\
                             .join(Flight, Ticket.airline_name==Flight.airline_name)\
@@ -333,6 +325,9 @@ def make_list_labels(times_list):
 
 @customer.route('/spending',methods=['GET','POST'])
 def spending():
+    if not current_user.is_authenticated or not current_user.get_type()=='customer':
+        flash('You must be logged in as a customer for this action')
+        return redirect(url_for('main.index'))
     # default part
     # date one year ago
     one_year_ago = datetime.now() - timedelta(days=365)
