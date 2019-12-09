@@ -7,64 +7,44 @@
 <div class="page-header">
     <h1>View Booking Agents</h1>
 </div>
-staff_airline={{staff_airline}}<br>
-<table>
-  <th>email_booking</th>
-  <th>date</th>
-  <th>airline_name</th>
 
-{% for line in agent_purchased_ticket %}
-  <tr>
-    <td>{{line.email_booking}}</td>
-    <td>{{line.date}}</td>
-    <td>{{line.airline_name}}</td>
-  </tr>
-{% endfor %}
+<h3>Top 5 Booking Agents based on Ticket Sales (past month)</h3>
 
 <table>
-  <th>email_booking</th>
-  <th>date</th>
-  <th>airline_name</th>
-
-{% for line in agent_purchased_ticket_30_days %}
-  <tr>
-    <td>{{line.email_booking}}</td>
-    <td>{{line.date}}</td>
-    <td>{{line.airline_name}}</td>
-  </tr>
-{% endfor %}
-
-<table>
-  <th>email_booking</th>
-  <th>date</th>
-  <th>airline_name</th>
+  <th>Booking Agent</th>
+  <th>Ticket Sales</th>
 
 {% for line in grouped_agent_purchased_ticket_30_days %}
   <tr>
     <td>{{line.email_booking}}</td>
     <td>{{line.count}}</td>
-    <td>{{line.airline_name}}</td>
-  </tr>
-{% endfor %}
-
-<table>
-  <th>email_booking</th>
-  <th>date</th>
-  <th>airline_name</th>
-
-{% for line in grouped_agent_purchased_ticket_one_year %}
-  <tr>
-    <td>{{line.email_booking}}</td>
-    <td>{{line.count}}</td>
-    <td>{{line.airline_name}}</td>
   </tr>
 {% endfor %}
 </table>
 
 
+<h3>Top 5 Booking Agents based on Ticket Sales (past year)</h3>
+
+
 <table>
-  <th>email_booking</th>
-  <th>total_commission</th>
+  <th>Booking Agent</th>
+  <th>Ticket Sales</th>
+
+{% for line in grouped_agent_purchased_ticket_one_year %}
+  <tr>
+    <td>{{line.email_booking}}</td>
+    <td>{{line.count}}</td>
+  </tr>
+{% endfor %}
+</table>
+
+
+<h3>Top 5 Booking Agents based on Commissions (past year)</h3>
+
+
+<table>
+  <th>Booking Agent</th>
+  <th>Total Commission</th>
 
 {% for line in commissions_grouped_agent %}
   <tr>
@@ -72,6 +52,7 @@ staff_airline={{staff_airline}}<br>
     <td>{{line.total_commission}}</td>
   </tr>
 {% endfor %}
+</table>
 
 
 

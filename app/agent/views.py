@@ -22,12 +22,28 @@ def topcustomers():
 
     customers=[]
     num_tickets=[]
+    max=0
+    top_6_message="No Tickets Bought in the Last 6 Months"
 
     for line in top_num_tickets:
         cust=line.email_customer
         tick=line.count_tickets
         customers.append(cust)
         num_tickets.append(tick)
+
+    if num_tickets!=[]:
+        max=max(num_tickets)
+        top_6_message="Top Customers from Tickets Bought in last 6 months"
+
+
+
+    check_commission_exists=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
+                            .add_columns(Purchase.email_customer, Purchase.email_booking, Ticket.ticket_id, Ticket.price)\
+                            .with_entities(Purchase.email_customer, (func.sum(Ticket.price)/10).label('sum_commissions'))\
+                            .group_by(Purchase.email_customer).filter(Purchase.email_booking==current_user.get_identifier())\
+                            .filter(Purchase.date>date_year_ago)
+
+
 
     top_commissions=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                         .add_columns(Purchase.email_customer, Purchase.email_booking, Ticket.ticket_id, Ticket.price)\
@@ -37,12 +53,19 @@ def topcustomers():
 
     com_customers=[]
     list_commissions=[]
+    max_comm=0
+    top_comm_year="No Commission Earned in the Last Year"
 
     for line in top_commissions:
         cust=line.email_customer
         com=line.sum_commissions
         com_customers.append(cust)
         list_commissions.append(com)
+    if list_commissions!=[]:
+        max_comm=max(list_commissions)
+        top_comm_year="Top Customers from Commission in Last Year"
+
+
 
     # query=Purchase.query.filter_by(email_booking = current_user.get_identifier()).join(Ticket).all()
     return render_template('agent/viewtopcustomers.html',top_num_tickets=top_num_tickets,\
@@ -51,8 +74,10 @@ def topcustomers():
                                                             top_commissions=top_commissions,\
                                                             com_customers=com_customers,\
                                                             list_commissions=list_commissions,\
-                                                            max=max(num_tickets),\
-                                                            max_comm=max(list_commissions))
+                                                            max=max,\
+                                                            max_comm=max_comm,\
+                                                            top_6_message=top_6_message,\
+                                                            top_comm_year=top_comm_year)
 
 @agent.route('/your_commission',methods=['GET','POST'])
 def your_commission():
@@ -80,7 +105,7 @@ def my_flights():
         Ticket.ticket_id==Purchase.ticket_id).join(Flight, Ticket.airline_name==Flight.airline_name)\
         .filter(Purchase.email_booking==current_user.get_identifier()).filter(Flight.departure_time >= datetime.now()).filter(Ticket.flight_num==Flight.flight_num).\
         filter(Ticket.departure_time==Flight.departure_time)
-    return render_template('customer/passenger_list.html',data=data)
+    return render_template('agent/agent_flights.html',data=data)
 
 @agent.route('/book_flight',methods=['GET','POST'])
 def book_flight():

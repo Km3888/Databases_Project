@@ -11,19 +11,13 @@
 <h2>Average Flight Ratings</h2>
 <h3>Flights with no ratings will not appear</h3>
 <table>
-  <th>airline_name</th>
-  <th>flight_num</th>
-  <th>departure_time</th>
-  <th>rating</th>
-  <th>comment</th>
-  <th>ave_rating</th>
+  <th>Flight Number</th>
+  <th>Departure Time</th>
+  <th>Average Rating</th>
 {% for line in ave_ticket_ratings %}
   <tr>
-    <td>{{line.airline_name}}</td>
     <td>{{line.flight_num}}</td>
     <td>{{line.departure_time}}</td>
-    <td>{{line.rating}}</td>
-    <td>{{line.comment}}</td>
     <td>{{line.ave_rating}}</td>
   </tr>
 {% endfor %}
@@ -32,18 +26,19 @@
 <h2>Flight Ratings and Comments</h2>
 <h3>Flights with no rating and no comment will not appear</h3>
 <table>
-  <th>airline_name</th>
-  <th>flight_num</th>
-  <th>departure_time</th>
-  <th>rating</th>
-  <th>comment</th>
+  <th>Flight Number</th>
+  <th>Departure Time</th>
+  <th>Rating</th>
+  <th>Comment</th>
+  <th>Customer Email</th>
+
 {% for line in ticket_rating_comment %}
   <tr>
-    <td>{{line.airline_name}}</td>
     <td>{{line.flight_num}}</td>
     <td>{{line.departure_time}}</td>
     <td>{{line.rating}}</td>
     <td>{{line.comment}}</td>
+    <td>{{line.email_customer}}</td>
   </tr>
 {% endfor %}
 

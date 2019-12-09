@@ -16,11 +16,11 @@
         <h1>Top Customers </h1>
     </div>
 
-    <h3>Top Customers from Tickets Bought in last 6 months</h3>
+    <h3>{{top_6_message}}</h3>
 
-    <table>
-        <th>email_customer</th>
-        <th>count_tickets</th>
+    <table style="width:350px">
+        <th>Customer</th>
+        <th>Number of Tickets</th>
 
       {% for line in top_num_tickets %}
         <tr>
@@ -29,9 +29,6 @@
         </tr>
       {% endfor %}
       </table>
-
-    {{customers}}<br>
-    {{num_tickets}}<br>
 
     <center>
       <div id="top_num_tickets">
@@ -77,10 +74,10 @@
       </div>
     </center>
 
-    <h3>Top Customers from Commission in last year</h3>
-    <table>
-        <th>email_customer</th>
-        <th>sum_commissions</th>
+    <h3>{{top_comm_year}}</h3>
+    <table style="width:350px">
+        <th>Customer</th>
+        <th>Commission</th>
 
       {% for line in top_commissions %}
         <tr>
@@ -89,9 +86,6 @@
         </tr>
       {% endfor %}
     </table>
-
-    {{com_customers}}<br>
-    {{list_commissions}}<br>
 
     <center>
       <div id="top_commissions">

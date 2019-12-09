@@ -41,9 +41,12 @@ def add_airplane():
         airline_name = db.session.query(Airline_Staff).filter(Airline_Staff.username == current_user.get_identifier()).first().airline_name
         plane_id=form.airplane_id.data
         seat_count=form.seat_count.data
-        plane=db.session.query(Airplane).filter_by(airline_name=airline_name,plane_id=plane_id).first()
+        plane=db.session.query(Airplane).filter_by(airline_name=airline_name,id=plane_id).first()
+        if seat_count<1:
+            flash('Seat count must be greater or equal to 1')
+            return redirect(url_for('staff.add_airplane'))
         if plane is None:
-            new_plane=Airplane(airline_name=airline_name,plane_id=plane_id,seat_count=seat_count)
+            new_plane=Airplane(airline_name=airline_name,id=plane_id,seat_count=seat_count)
             db.session.add(new_plane)
             db.session.commit()
         flash('There is already a flight with this ID in your airline')
@@ -237,7 +240,7 @@ def passenger_list():
 @staff.route('/viewbookingagents',methods=['GET','POST'])
 def viewbookingagents():
 #    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_id().split('_')[1:]).first()
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
@@ -258,8 +261,6 @@ def viewbookingagents():
 
     return render_template('staff/viewbookingagents.html', \
                             staff_airline=staff_airline,\
-                            agent_purchased_ticket_30_days=agent_purchased_ticket_30_days,\
-                            agent_purchased_ticket=agent_purchased_ticket,\
                             grouped_agent_purchased_ticket_30_days=grouped_agent_purchased_ticket_30_days,\
                             grouped_agent_purchased_ticket_one_year=grouped_agent_purchased_ticket_one_year,\
                             commissions_grouped_agent=commissions_grouped_agent)
@@ -269,7 +270,7 @@ def viewbookingagents():
 # all comments and ratings given for that flight by customer
 @staff.route('/viewflightratings',methods=['GET','POST'])
 def viewflightratings():
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
@@ -293,10 +294,12 @@ def viewflightratings():
                     Ticket.flight_num.label('flight_num'),\
                     Ticket.departure_time.label('departure_time'),\
                     Purchase.rating.label('rating'),\
+                    Purchase.email_customer.label('email_customer'),\
                     Purchase.comment.label('comment'))\
                     .with_entities(Ticket.flight_num.label('flight_num'),\
                     Ticket.departure_time.label('departure_time'),\
                     Purchase.rating.label('rating'),\
+                    Purchase.email_customer.label('email_customer'),\
                     Purchase.comment.label('comment'))\
                     .filter(Ticket.airline_name==staff_airline)\
                     .filter(or_(Purchase.rating!=None, Purchase.comment!=None, Purchase.comment!=''))
@@ -408,7 +411,7 @@ def make_list_labels(times_list):
 
 @staff.route('/staffviewreports',methods=['GET','POST'])
 def staffviewreports():
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
