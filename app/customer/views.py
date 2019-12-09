@@ -349,11 +349,12 @@ def spending():
     graph_labels=make_list_labels(query_list_months)
 
     monthly_sums=[]
+                                # .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
 
     for i in range(len(query_list_months)-1):
         default_month=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                                 .with_entities(func.sum(Ticket.price).label('all_sum'))\
-                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.email_customer==current_user.get_identifier())\
                                 .filter(Purchase.date>query_list_months[i])\
                                 .filter(Purchase.date<query_list_months[i+1]).first()
         default_month_sum=default_month.all_sum

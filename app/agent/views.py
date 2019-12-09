@@ -32,6 +32,11 @@ def topcustomers():
         customers.append(cust)
         num_tickets.append(tick)
 
+    max_tick=0
+
+    if num_tickets!=[]:
+        max_tick=max(num_tickets)
+
 
 
     top_commissions=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
@@ -43,11 +48,17 @@ def topcustomers():
     com_customers=[]
     list_commissions=[]
 
+    max_comm=0
+
+
     for line in top_commissions:
         cust=line.email_customer
         com=line.sum_commissions
         com_customers.append(cust)
         list_commissions.append(com)
+
+    if list_commissions!=[]:
+        max_comm=max(list_commissions)
 
     # query=Purchase.query.filter_by(email_booking = current_user.get_identifier()).join(Ticket).all()
     return render_template('agent/viewtopcustomers.html',top_num_tickets=top_num_tickets,\
@@ -56,8 +67,8 @@ def topcustomers():
                                                             top_commissions=top_commissions,\
                                                             com_customers=com_customers,\
                                                             list_commissions=list_commissions,\
-                                                            max=max(num_tickets),\
-                                                            max_comm=max(list_commissions))
+                                                            max_tick=max_tick,\
+                                                            max_comm=max_comm)
 
 @agent.route('/your_commission',methods=['GET','POST'])
 def your_commission():

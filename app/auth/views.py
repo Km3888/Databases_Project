@@ -51,6 +51,7 @@ def agent():
     if form.validate_on_submit():
         agent=BookingAgent.query.filter_by(email=form.email.data.lower()).first()
         if agent is not None and agent.verify_password(form.password.data) and agent.verify_id(form.booking_agent_id.data):
+            login_user(agent, form.remember_me.data)
             next=request.args.get('next')
             if next is None or not next.startwith('/'):
                 next=url_for('main.index')

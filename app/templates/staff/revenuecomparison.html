@@ -15,29 +15,7 @@
         <h1>Revenue Comparison</h1>
     </div>
 
-    <h3>Revenue Comparison (Last Month)</h3>
-
-    {{cust_last_month}}
-
-    {{cust_last_month_value}}
-    <!-- <table>
-      <th>sum_month_cust</th>
-    {% for line in cust_last_month %}
-      <tr>
-        <td>{{line.sum_month_cust}}</td>
-      </tr>
-    {% endfor %}
-    </table> -->
-
-    <table>
-      <th>sum_month_book</th>
-    {% for line in booking_last_month %}
-      <tr>
-        <td>{{line.sum_month_book}}</td>
-      </tr>
-    {% endfor %}
-    </table>
-
+    <h3>{{message_month}}</h3>
 
     <center>
       <div>
@@ -65,7 +43,7 @@
       </div>
     </center>
 
-    <h3>Revenue Comparison (Last Year)</h3>
+    <h3>{{message_year}}</h3>
     <center>
       <div>
       <canvas id="last_year" width="600" height="400"></canvas>

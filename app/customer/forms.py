@@ -32,5 +32,5 @@ class SpendingForm(FlaskForm):
     start=DateField("Start", format="%Y-%m-%d",\
             validators=[DataRequired()])
     end=DateField("End", format="%Y-%m-%d",\
-            validators=[DataRequired()]),
+            validators=[DataRequired()])
     submit = SubmitField('Display Spending')
