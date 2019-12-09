@@ -13,11 +13,10 @@ def compute_price(flight_num,airline_name,departure_time):
     flight = db.session.query(Flight).filter_by(airline_name=airline_name,
                                                 flight_num=flight_num,
                                                 departure_time=departure_time).first()
-
     price = flight.price
-    ticket = db.session.query(Flight, Ticket).join(Ticket, Flight.airline_name == Ticket.airline_name & \
-                                                   Flight.flight_num == Ticket.flight_num & \
-                                                   Flight.departure_time == Ticket.departure_time).all()
+    ticket = db.session.query(Ticket).filter(flight.airline_name == Ticket.airline_name).filter(
+        flight.flight_num == Ticket.flight_num).filter(
+        flight.departure_time == Ticket.departure_time).all()
     num_tickets = len(ticket)
     airplane = db.session.query(Airplane).filter_by(airline_name=flight.airline_name, id=flight.airplane_id).first()
     capacity = airplane.seat_count
@@ -97,10 +96,10 @@ def oneway():
         earliest=datetime.combine(form.flight_date.data,datetime.min.time())
         latest=datetime.combine(form.flight_date.data+timedelta(days=1),datetime.min.time())
 
-
         data=db.session.query(Flight,first,second).join(first,Flight.departs==first.name) \
             .join(second, Flight.arrives == second.name). \
-            filter(Flight.departure_time > earliest).filter(Flight.departure_time < latest)
+            filter(Flight.departure_time > earliest).filter(Flight.departure_time < latest)\
+            .filter(Flight.arrival_time>datetime.now())
 
         if len(form.source_city.data)>0:
             data=data.filter(first.city==form.source_city.data)
@@ -118,10 +117,13 @@ def oneway():
 @public.route('/seeflightsstatus',methods=['GET','POST'])
 def seeflightsstatus():
     form=SeeFlightsStatus()
-    # if form.validate_on_submit():
-        # where it goes once submitted
-        # test to see which part bugginb
-        # return redirect('main.index')
-        #return redirect('/auth/searchfutureflights/'+form.type.data)
-    # what happens if not submitted
+    if form.validate_on_submit():
+        airline_name=form.airline_name.data
+        flight_num=form.flight_num.data
+        departure_time=form.departure_time.data
+        flight=db.session.query(Flight).filter_by(airline_name=airline_name\
+                                                  ,flight_num=flight_num,departure_time=departure_time).first()
+        if flight is not None:
+            return render_template('public/view_flight_status.html',status=flight.status)
+        flash('That flight does not exist')
     return render_template('public/seeflightsstatus.html',form=form)

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField,SelectField,DateField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,SelectField,DateField,IntegerField
 from wtforms.fields.html5 import DateTimeLocalField,DateField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
@@ -44,5 +44,7 @@ class FlightTypeForm(FlaskForm):
 
 
 class SeeFlightsStatus(FlaskForm):
-    flight=StringField('SampleSee', validators=[DataRequired(), Length(1, 64)])
+    airline_name=StringField('Airline Name', validators=[DataRequired(), Length(1, 64)])
+    flight_num = IntegerField('Flight Number', validators=[DataRequired()])
+    departure_time = DateTimeLocalField('Departure Time', validators=[DataRequired()],format='%Y-%m-%dT%H:%M')
     submit=SubmitField('Search')

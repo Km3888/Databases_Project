@@ -15,7 +15,7 @@ class ChangeStatusForm(FlaskForm):
 class AddAirplaneForm(FlaskForm):
     airplane_id=IntegerField('Airplane ID number',validators=[DataRequired(message='Mandatory')])
     seat_count=IntegerField('Number of Seats in New Airplane',validators=[DataRequired(message='Mandatory')])
-    submit=SubmitField('Add Flight')
+    submit=SubmitField('Add Airlplane')
 
 class AddFlightForm(FlaskForm):
     flight_num=IntegerField('Flight Number',validators=[DataRequired(message='Mandatory')])

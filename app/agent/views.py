@@ -12,6 +12,9 @@ from sqlalchemy.sql import desc
 
 @agent.route('/topcustomers',methods=['GET','POST'])
 def topcustomers():
+    if not current_user.is_authenticated or not current_user.get_type()=='agent':
+        flash('You must be logged in as a booking agent for this action')
+        return redirect(url_for('main.index'))
 
     date_six_months_ago=datetime.now()-timedelta(days=180)
     date_year_ago=datetime.now()-timedelta(days=365)
@@ -28,6 +31,8 @@ def topcustomers():
         tick=line.count_tickets
         customers.append(cust)
         num_tickets.append(tick)
+
+
 
     top_commissions=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                         .add_columns(Purchase.email_customer, Purchase.email_booking, Ticket.ticket_id, Ticket.price)\
@@ -56,34 +61,47 @@ def topcustomers():
 
 @agent.route('/your_commission',methods=['GET','POST'])
 def your_commission():
+    if not current_user.is_authenticated or not current_user.get_type()=='agent':
+        flash('You must be logged in as a booking agent for this action')
+        return redirect(url_for('main.index'))
     form=CommissionForm()
     if form.validate_on_submit():
-        start_date=form.start
-        end_date=form.end
-        earliest = datetime.combine(start_date.data, datetime.min.time())
-        latest = datetime.combine(end_date.data + timedelta(days=1), datetime.min.time())
+        start_date=form.start.data
+        end_date=form.end.data
+        earliest = datetime.combine(start_date, datetime.min.time())
+        print(earliest)
+        latest = datetime.combine(end_date + timedelta(days=1), datetime.min.time())
+        all_data=db.session.query(Ticket,Purchase).join(Purchase,Ticket.ticket_id==Purchase.ticket_id)\
+            .filter(Purchase.email_booking==current_user.get_identifier()).filter(Purchase.date>=earliest).all()
+        print('all data:',all_data)
         data=db.session.query(Ticket,Purchase).join(Purchase,Ticket.ticket_id==Purchase.ticket_id)\
             .filter(Purchase.email_booking==current_user.get_identifier()).filter(Purchase.date>=earliest).filter(Purchase.date<=latest).all()
         total=0
+        print('data:',data)
         for row in data:
             total+=row[0].price
         total/=10
         return render_template('agent/display_commission.html',commission=total)
     return render_template('agent/commission_form.html',form=form)
 
-#TODO check functioniality
 @agent.route('/my_flights',methods=['GET','POST'])
 def my_flights():
+    if not current_user.is_authenticated or not current_user.get_type()=='agent':
+        flash('You must be logged in as a booking agent for this action')
+        return redirect(url_for('main.index'))
     if not current_user.is_authenticated or not current_user.get_type()=='agent':
         return redirect(url_for('main.index'))
     data=db.session.query(Ticket,Purchase,Flight).join(Purchase,\
         Ticket.ticket_id==Purchase.ticket_id).join(Flight, Ticket.airline_name==Flight.airline_name)\
         .filter(Purchase.email_booking==current_user.get_identifier()).filter(Flight.departure_time >= datetime.now()).filter(Ticket.flight_num==Flight.flight_num).\
         filter(Ticket.departure_time==Flight.departure_time)
-    return render_template('customer/passenger_list.html',data=data)
+    return render_template('agent/agent_flights.html',data=data)
 
 @agent.route('/book_flight',methods=['GET','POST'])
 def book_flight():
+    if not current_user.is_authenticated or not current_user.get_type()=='agent':
+        flash('You must be logged in as a booking agent for this action')
+        return redirect(url_for('main.index'))
     form=PurchaseFlightForm()
     if form.validate_on_submit():
         flight=db.session.query(Flight).filter_by(airline_name=form.airline_name.data,
@@ -91,9 +109,10 @@ def book_flight():
                                                 departure_time=form.departure.data,
                                       ).first()
         if flight is not None:
-            ticket = db.session.query(Flight, Ticket).join(Ticket, Flight.airline_name == Ticket.airline_name & \
-                                                           Flight.flight_num == Ticket.flight_num & \
-                                                           Flight.departure_time == Ticket.departure_time).all()
+            ticket = db.session.query(Ticket).filter(flight.airline_name == Ticket.airline_name).filter(
+                flight.flight_num == Ticket.flight_num).filter(
+                flight.departure_time == Ticket.departure_time).all()
+
             num_tickets = len(ticket)
             airplane = db.session.query(Airplane).filter_by(airline_name=flight.airline_name,
                                                             id=flight.airplane_id).first()
@@ -101,7 +120,7 @@ def book_flight():
             if num_tickets == capacity:
                 flash('This flight is fully booked ')
                 return render_template('customer/book_flights.html', form=form)
-            customer=db.session.query(Customer).filter(Customer.email==form.customer_email).first()
+            customer=db.session.query(Customer).filter(Customer.email==form.customer_email.data).first()
             if customer is None:
                 flash('This customer does not exist ')
                 return render_template('customer/book_flights.html', form=form)
@@ -113,7 +132,7 @@ def book_flight():
             session['airline']=form.airline_name.data
             session['flight_num']=form.flight_num.data
             session['departure']=form.departure.data
-            session['customer']=form.customer
+            session['customer']=form.customer_email.data
 
             return redirect('confirm_purchase')
         flash(u'we need a real flight dawg')
@@ -122,9 +141,18 @@ def book_flight():
 
 @agent.route('/confirm_purchase',methods=['GET','POST'])
 def confirm_purchase():
+    if not current_user.is_authenticated or not current_user.get_type()=='agent':
+        flash('You must be logged in as a booking agent for this action')
+        return redirect(url_for('main.index'))
     if ('airline' not in session) or ('flight_num' not in session) or ('departure' not in session):
         flash('no flight selected')
         return redirect(url_for('main.index'))
+    airline_name = session.get('airline')
+    flight_num = session.get('flight_num')
+    departure_time = session.get('departure')
+    price = session.get('price')
+    customer = session.get('customer')
+
     session.pop('airline')
     session.pop('flight_num')
     session.pop('departure')
@@ -132,11 +160,6 @@ def confirm_purchase():
     session.pop('customer')
 
     form=ConfirmPurchaseForm()
-    airline_name = session.get('airline')
-    flight_num = session.get('flight_num')
-    departure_time = session.get('departure')
-    price = session.get('price')
-    customer = session.get('customer')
 
 
     if form.validate_on_submit():
@@ -159,7 +182,7 @@ def confirm_purchase():
         return redirect(url_for('main.index'))
     flight = db.session.query(Flight).filter_by(airline_name=airline_name,
                                                 flight_num=flight_num,
-                                                departure_time=departure_time,
+                                             departure_time=departure_time,
                                                 ).first()
     arrival_time=flight.arrival_time
     source=flight.departs
