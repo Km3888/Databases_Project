@@ -137,6 +137,9 @@ def frequent_customers():
         Airline_Staff.username == current_user.get_identifier()).first().airline_name
     freq_customer=db.session.query(Purchase.email_customer.label("customer"),func.count(Purchase.ticket_id)).join(Ticket,Purchase.ticket_id==Ticket.ticket_id)\
         .filter(Ticket.airline_name==airline_name).group_by(Purchase.email_customer).order_by(func.count(Purchase.ticket_id).desc()).first()
+    freq_customer_query=db.session.query(Purchase.email_customer.label("customer"),func.count(Purchase.ticket_id)).join(Ticket,Purchase.ticket_id==Ticket.ticket_id)\
+        .filter(Ticket.airline_name==airline_name).group_by(Purchase.email_customer).order_by(func.count(Purchase.ticket_id).desc())
+
     if freq_customer is not None:
         freq_customer=freq_customer.customer
     else:
@@ -149,7 +152,7 @@ def frequent_customers():
             session['email']=form.email.data
             return redirect('view_customer_flights')
         flash('This user does not exist')
-    return render_template('staff/frequent_customers.html',form=form,freq_customer=freq_customer)
+    return render_template('staff/frequent_customers.html',form=form,freq_customer=freq_customer, freq_customer_query=freq_customer_query)
 
 @staff.route('/view_customer_flights',methods=['GET','POST'])
 def view_customer_flights():
@@ -165,9 +168,14 @@ def view_customer_flights():
         join(Flight,Flight.airline_name==Ticket.airline_name).filter(Flight.flight_num==Ticket.flight_num).\
         filter(Flight.departure_time==Ticket.departure_time).\
         filter(Ticket.airline_name==airline_name).order_by(Ticket.departure_time).filter(Purchase.email_customer==email)
+
+    data_query=db.session.query(Purchase,Ticket,Flight).join(Ticket,Ticket.ticket_id==Purchase.ticket_id).\
+        join(Flight,Flight.airline_name==Ticket.airline_name).filter(Flight.flight_num==Ticket.flight_num).\
+        filter(Flight.departure_time==Ticket.departure_time).\
+        filter(Ticket.airline_name==airline_name).order_by(Ticket.departure_time).filter(Purchase.email_customer==email)
     data=data.all()
     session['email']=email
-    return render_template('staff/view_customer_flights.html',data=data,email=email)
+    return render_template('staff/view_customer_flights.html',data=data,email=email, data_query=data_query)
 
 @staff.route('/top_destinations',methods=['GET','POST'])
 def top_destinations():
@@ -185,6 +193,7 @@ def top_destinations():
         (Flight.flight_num==Ticket.flight_num).filter(Flight.airline_name==airline_name).\
         filter(Flight.departure_time>=last_90).group_by(Flight.arrives).\
         order_by(func.count(Ticket.ticket_id)).all()[:5]
+
     top_365 = db.session.query(Flight.arrives, func.count(Ticket.ticket_id)). \
         join(Flight, Flight.airline_name == Ticket.airline_name).filter \
         (Flight.departure_time == Ticket.departure_time).filter \
