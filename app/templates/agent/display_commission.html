@@ -5,6 +5,17 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>You earned ${{commission}}</h1>
+    <h1>Commissions</h1>
 </div>
+
+<div>
+  <h3>You earned ${{commission}}</h3>
+</div>
+<div>
+  <h3>You earned, on average, {{average}} $/ticket </h3>
+</div>
+<div>
+  <h3>You bought {{num_tickets}} tickets</h3>
+</div>
+
 {% endblock %}

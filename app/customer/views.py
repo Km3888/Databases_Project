@@ -91,7 +91,7 @@ def confirm_purchase():
                       departure_time=departure_time,
                       price=price)
         purchase=Purchase(ticket_id=ticket.ticket_id,
-                          email_customer=current_user.get_id().split('_')[1:],
+                          email_customer=current_user.get_identifier(),
                           card_num=form.card_number.data,
                           card_expiration=form.card_expiration.data,
                           date=datetime.now())
@@ -335,10 +335,10 @@ def spending():
     # table purchases within past year
     default_total_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                                 .add_columns(Purchase.email_customer.label('email_customer'), Purchase.date.label('date'), Ticket.price.label('price'))\
-                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.email_customer==current_user.get_identifier())\
                                 .filter(Purchase.date>one_year_ago)
     # sum for all purchases last year
-    default_total_sum_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_id().split('_')[1:]).filter(Purchase.date>one_year_ago).first()
+    default_total_sum_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id).with_entities(func.sum(Ticket.price).label('all_sum')).filter(Purchase.email_customer==current_user.get_identifier()).filter(Purchase.date>one_year_ago).first()
     default_total_sum=default_total_sum_table.all_sum
 
     if default_total_sum==None:
@@ -384,7 +384,7 @@ def spending():
         # sum for all purchases from that period
         period_table=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                                 .with_entities(func.sum(Ticket.price).label('all_sum'))\
-                                .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                .filter(Purchase.email_customer==current_user.get_identifier())\
                                 .filter(Purchase.date>=start_date)\
                                 .filter(Purchase.date<=end_date).first()
 
@@ -404,7 +404,7 @@ def spending():
         for i in range(len(query_ranges)-1):
             thrity_days=Purchase.query.join(Ticket, Purchase.ticket_id==Ticket.ticket_id)\
                                     .with_entities(func.sum(Ticket.price).label('all_sum'))\
-                                    .filter(Purchase.email_customer==current_user.get_id().split('_')[1:])\
+                                    .filter(Purchase.email_customer==current_user.get_identifier())\
                                     .filter(Purchase.date>=query_ranges[i])\
                                     .filter(Purchase.date<query_ranges[i+1]).first()
             thrity_days_sums=thrity_days.all_sum

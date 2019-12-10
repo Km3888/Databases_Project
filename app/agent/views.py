@@ -89,10 +89,17 @@ def your_commission():
             .filter(Purchase.email_booking==current_user.get_identifier()).filter(Purchase.date>=earliest).filter(Purchase.date<=latest).all()
         total=0
         print('data:',data)
+
+        ticket_count=0
         for row in data:
             total+=row[0].price
+            ticket_count+=1
         total/=10
-        return render_template('agent/display_commission.html',commission=total)
+        if ticket_count==0:
+            average_commission=0
+        else:
+            average_commission=total/ticket_count
+        return render_template('agent/display_commission.html',commission=total, num_tickets=ticket_count, average=average_commission)
     return render_template('agent/commission_form.html',form=form)
 
 @agent.route('/my_flights',methods=['GET','POST'])
