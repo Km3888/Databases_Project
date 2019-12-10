@@ -32,4 +32,4 @@ class CommissionForm(FlaskForm):
         default=datetime.today,  ## Now it will call it everytime.
         validators=[DataRequired()]
     )
-    submit = SubmitField('Confirm Purchase')
+    submit = SubmitField('Confirm')

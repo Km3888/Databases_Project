@@ -7,7 +7,7 @@
 <div class="page-header">
     <h1>Results for Search Future Flights</h1>
 </div>
-<table style="width: 100%">
+<table border="1" style="width: 100%">
   <th> airline</th>
   <th> flight number</th>
   <th> departure time </th>
@@ -23,10 +23,9 @@
     <td>{{line[0].flight_num}}</td>
     <td>{{line[0].departure_time}}</td>
     <td>{{line[0].arrival_time}}</td>
-      <td>{{line[0].departs}}</td>
+    <td>{{line[0].departs}}</td>
     <td>{{line[0].arrives}}</td>
-    <td>{{line[0].status}}</td
-    <td>{{line[0].price}}</td>
+    <td>{{line[0].status}}</td>
     <td>{{compute_price(line[0].flight_num,line[0].airline_name,line[0].departure_time)}}</td>
 
   </tr>

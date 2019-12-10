@@ -15,6 +15,7 @@
   <th> departure airport</th>
   <th> arrival airport</th>
   <th> flight status</th>
+  <th>base price</th>
 
 {% for line in data %}
   <tr>
@@ -22,9 +23,9 @@
     <td>{{line[0].flight_num}}</td>
     <td>{{line[0].departure_time}}</td>
     <td>{{line[0].arrival_time}}</td>
-      <td>{{line[0].departs}}</td>
+    <td>{{line[0].departs}}</td>
     <td>{{line[0].arrives}}</td>
-    <td>{{line[0].status}}</td
+    <td>{{line[0].status}}</td>
     <td>{{line[0].price}}</td>
 
   </tr>

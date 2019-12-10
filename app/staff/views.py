@@ -135,9 +135,12 @@ def frequent_customers():
         return redirect(url_for('main.index'))
     airline_name = db.session.query(Airline_Staff).filter(
         Airline_Staff.username == current_user.get_identifier()).first().airline_name
-    freq_customer=db.session.query(Purchase.email_customer,func.count(Purchase.ticket_id)).join(Ticket,Purchase.ticket_id==Ticket.ticket_id)\
-        .filter(Ticket.airline_name==airline_name).group_by(Purchase.email_customer).order_by(func.count(Purchase.ticket_id).desc()).first()[0]
-    if freq_customer is None:
+    freq_customer=db.session.query(Purchase.email_customer.label("customer"),func.count(Purchase.ticket_id)).join(Ticket,Purchase.ticket_id==Ticket.ticket_id)\
+        .filter(Ticket.airline_name==airline_name).group_by(Purchase.email_customer).order_by(func.count(Purchase.ticket_id).desc()).first()
+    if freq_customer is not None:
+        freq_customer=freq_customer.customer
+    else:
+        freq_customer="not existent"
         flash('Looks like no-one has bought anything from your airline yet')
     form=FrequentCustomersForm()
     if form.validate_on_submit():
@@ -248,7 +251,7 @@ def viewbookingagents():
         flash('You must be logged in as an airline staff for this action')
         return redirect(url_for('main.index'))
     #    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_id().split('_')[1:]).first()
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
@@ -282,7 +285,7 @@ def viewflightratings():
     if not current_user.is_authenticated or not current_user.get_type()=='staff':
         flash('You must be logged in as an airline staff for this action')
         return redirect(url_for('main.index'))
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
@@ -423,7 +426,7 @@ def make_list_labels(times_list):
 
 @staff.route('/staffviewreports',methods=['GET','POST'])
 def staffviewreports():
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
 
     staff_airline=staff_airline_table.airline_name
 
@@ -551,7 +554,7 @@ def revenuecomparison():
     if not current_user.is_authenticated or not current_user.get_type()=='staff':
         flash('You must be logged in as an airline staff for this action')
         return redirect(url_for('main.index'))
-    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifer()).first()
+    staff_airline_table=Airline_Staff.query.filter(Airline_Staff.username==current_user.get_identifier()).first()
     staff_airline=staff_airline_table.airline_name
 
     # last month
@@ -575,6 +578,11 @@ def revenuecomparison():
     booking_last_month_value=booking_last_month[0][0]
 
     values_month=[cust_last_month_value,booking_last_month_value]
+
+    message_month="Revenue Comparison (Last Month)"
+
+    if values_month==[None,None]:
+        message_month="No Revenue this Last Month"
 
     for i in range(len(values_month)):
         if values_month[i]==None:
@@ -605,9 +613,17 @@ def revenuecomparison():
 
 
     values_year=[cust_last_year_value,booking_last_year_value]
+
+    message_year="Revenue Comparison (Last Year)"
+
+    if values_year==[None,None]:
+        message_year="No Revenue this Last Year"
+
+
     for i in range(len(values_year)):
         if values_year[i]==None:
             values_year[i]=(0)
+
 
     #colors=["#F7464A", "#46BFBD"]
     colors=["#F7464A", "#800000"]
@@ -619,4 +635,6 @@ def revenuecomparison():
                         set_month=zip(values_month, labels, colors),\
                         max_month=max(values_month),\
                         set_year=zip(values_year, labels, colors),\
-                        max_year=max(values_year))
+                        max_year=max(values_year), \
+                        message_month=message_month,\
+                        message_year=message_year)

@@ -18,9 +18,9 @@
 
     <h3>Top Customers from Tickets Bought in last 6 months</h3>
 
-    <table>
-        <th>email_customer</th>
-        <th>count_tickets</th>
+    <table border="1" style="width: 100%">
+        <th>Customer</th>
+        <th>Number of Tickets</th>
 
       {% for line in top_num_tickets %}
         <tr>
@@ -30,8 +30,7 @@
       {% endfor %}
       </table>
 
-    {{customers}}<br>
-    {{num_tickets}}<br>
+
 
     <center>
       <div id="top_num_tickets">
@@ -59,7 +58,7 @@
        // get bar chart canvas
        var mychart = document.getElementById("chart").getContext("2d");
          steps = 10
-         max = {{max}}
+         max = {{max_tick}}
        // draw bar chart
        new Chart(mychart).Bar(barData, {
          scaleOverride: true,
@@ -78,9 +77,9 @@
     </center>
 
     <h3>Top Customers from Commission in last year</h3>
-    <table>
-        <th>email_customer</th>
-        <th>sum_commissions</th>
+    <table border="1" style="width: 100%">
+        <th>Customer</th>
+        <th>Commission Amount</th>
 
       {% for line in top_commissions %}
         <tr>
@@ -90,8 +89,6 @@
       {% endfor %}
     </table>
 
-    {{com_customers}}<br>
-    {{list_commissions}}<br>
 
     <center>
       <div id="top_commissions">
