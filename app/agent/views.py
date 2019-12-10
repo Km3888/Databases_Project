@@ -122,6 +122,9 @@ def book_flight():
         return redirect(url_for('main.index'))
     form=PurchaseFlightForm()
     if form.validate_on_submit():
+        if form.departure.data < datetime.now():
+            flash('Flight must be in the future')
+            return render_template('customer/book_flights.html', form=form)
         flight=db.session.query(Flight).filter_by(airline_name=form.airline_name.data,
                                                 flight_num=form.flight_num.data,
                                                 departure_time=form.departure.data,
